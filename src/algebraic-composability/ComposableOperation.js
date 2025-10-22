@@ -1,12 +1,14 @@
+import { z } from 'zod';
+
 /**
- * Represents an operation with a defined input and output schema.
+ * Represents an operation with a defined input and output schema using Zod.
  */
 export class ComposableOperation {
   /**
    * @param {string} name - The name of the operation.
    * @param {(input: any) => any} operation - The function to execute.
-   * @param {string} inputSchema - The expected type of the input.
-   * @param {string} outputSchema - The type of the output.
+   * @param {z.ZodType<any, any>} inputSchema - The Zod schema for the input.
+   * @param {z.ZodType<any, any>} outputSchema - The Zod schema for the output.
    */
   constructor(name, operation, inputSchema, outputSchema) {
     this.name = name;
@@ -21,18 +23,9 @@ export class ComposableOperation {
    * @returns {any} The result of the operation.
    */
   execute(input) {
-    if (typeof input !== this.inputSchema) {
-      throw new Error(
-        `Invalid input type for ${this.name}: expected ${this.inputSchema}, got ${typeof input}`
-      );
-    }
-    const result = this.operation(input);
-    if (typeof result !== this.outputSchema) {
-      throw new Error(
-        `Invalid output type for ${this.name}: expected ${this.outputSchema}, got ${typeof result}`
-      );
-    }
-    return result;
+    const parsedInput = this.inputSchema.parse(input);
+    const result = this.operation(parsedInput);
+    return this.outputSchema.parse(result);
   }
 }
 
@@ -46,13 +39,14 @@ export function compose(...operations) {
     return (input) => input;
   }
 
-  // Verify that the schemas are compatible
+  // A simple check for schema compatibility. For a more robust check,
+  // one might need a way to verify if one Zod schema is a subtype of another.
   for (let i = 0; i < operations.length - 1; i++) {
     const op1 = operations[i];
     const op2 = operations[i + 1];
     if (op1.outputSchema !== op2.inputSchema) {
-      throw new Error(
-        `Incompatible schemas: ${op1.name} output (${op1.outputSchema}) does not match ${op2.name} input (${op2.inputSchema})`
+      console.warn(
+        `Potentially incompatible schemas: ${op1.name} output and ${op2.name} input are not the same schema object.`
       );
     }
   }
