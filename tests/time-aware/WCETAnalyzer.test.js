@@ -1,4 +1,4 @@
-const WCETAnalyzer = require('../../src/time-aware/WCETAnalyzer');
+import WCETAnalyzer from '../../src/time-aware/WCETAnalyzer.js';
 
 describe('WCETAnalyzer', () => {
   it('should measure the execution time of a function', () => {

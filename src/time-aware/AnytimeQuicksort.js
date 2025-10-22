@@ -6,7 +6,7 @@
  * - Interruptible: can stop at any moment
  * - Predictable degradation: partial results are useful
  */
-class AnytimeQuicksort {
+export default class AnytimeQuicksort {
   constructor(deadline) {
     this.deadline = deadline; // milliseconds
     this.startTime = null;
@@ -82,5 +82,3 @@ class AnytimeQuicksort {
     return 1 - (inversions / arr.length);
   }
 }
-
-module.exports = AnytimeQuicksort;

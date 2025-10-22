@@ -1,4 +1,4 @@
-const AnytimeQuicksort = require('../../src/time-aware/AnytimeQuicksort');
+import AnytimeQuicksort from '../../src/time-aware/AnytimeQuicksort.js';
 
 describe('AnytimeQuicksort', () => {
   it('should sort an array given enough time', () => {

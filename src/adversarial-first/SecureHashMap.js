@@ -7,7 +7,7 @@
  * 3. Automatic rehashing under attack
  * 4. Constant-time operations (timing attack resistant)
  */
-class SecureHashMap {
+export default class SecureHashMap {
   constructor(capacity = 16) {
     this.capacity = capacity;
 
@@ -202,5 +202,3 @@ class SecureHashMap {
     };
   }
 }
-
-module.exports = SecureHashMap;

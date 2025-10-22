@@ -7,7 +7,7 @@
  * - Thermal constraints
  * - Deadline requirements
  */
-class DVFSController {
+export default class DVFSController {
   constructor() {
     // P-states: frequency (GHz), voltage (V), power (W)
     this.pStates = [
@@ -127,5 +127,3 @@ class DVFSController {
     return this.pStates[this.currentStateIdx];
   }
 }
-
-module.exports = DVFSController;

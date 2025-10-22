@@ -3,7 +3,7 @@
  *
  * Uses Extreme Value Theory to predict worst-case timing
  */
-class WCETAnalyzer {
+export default class WCETAnalyzer {
   constructor() {
     this.samples = [];
   }
@@ -56,5 +56,3 @@ class WCETAnalyzer {
     };
   }
 }
-
-module.exports = WCETAnalyzer;

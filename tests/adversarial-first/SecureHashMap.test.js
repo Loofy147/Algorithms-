@@ -1,4 +1,4 @@
-const SecureHashMap = require('../../src/adversarial-first/SecureHashMap');
+import SecureHashMap from '../../src/adversarial-first/SecureHashMap.js';
 
 describe('SecureHashMap', () => {
   it('should set and get values correctly', () => {

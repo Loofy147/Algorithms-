@@ -1,4 +1,4 @@
-const ResourceAwareScheduler = require('../../src/resource-aware/ResourceAwareScheduler');
+import ResourceAwareScheduler from '../../src/resource-aware/ResourceAwareScheduler.js';
 
 describe('ResourceAwareScheduler', () => {
   it('should schedule tasks that are within the resource budget', () => {

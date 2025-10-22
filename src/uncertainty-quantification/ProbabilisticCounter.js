@@ -3,7 +3,7 @@
  *
  * Uses the Wilson score interval for a binomial proportion.
  */
-class ProbabilisticCounter {
+export default class ProbabilisticCounter {
   constructor(z = 1.96) {
     // z-score for the desired confidence level (1.96 for 95%)
     this.z = z;
@@ -45,5 +45,3 @@ class ProbabilisticCounter {
     return `${this.successes}/${this.trials} [${interval.lower.toFixed(3)}, ${interval.upper.toFixed(3)}]`;
   }
 }
-
-module.exports = ProbabilisticCounter;

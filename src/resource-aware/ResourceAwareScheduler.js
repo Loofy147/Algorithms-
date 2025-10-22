@@ -4,7 +4,7 @@
  * Optimizes across N dimensions: cpu, energy, memory, bandwidth
  * Uses Pareto dominance for multi-objective optimization
  */
-class ResourceAwareScheduler {
+export default class ResourceAwareScheduler {
   constructor(budgets) {
     this.budgets = budgets; // {cpu: X, energy: Y, memory: Z, bandwidth: W}
     this.consumed = Object.keys(budgets).reduce((acc, k) => ({...acc, [k]: 0}), {});
@@ -160,5 +160,3 @@ class ResourceAwareScheduler {
     };
   }
 }
-
-module.exports = ResourceAwareScheduler;

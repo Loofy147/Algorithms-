@@ -1,4 +1,4 @@
-const ProbabilisticCounter = require('../../src/uncertainty-quantification/ProbabilisticCounter');
+import ProbabilisticCounter from '../../src/uncertainty-quantification/ProbabilisticCounter.js';
 
 describe('ProbabilisticCounter', () => {
   it('should initialize with zero counts', () => {
