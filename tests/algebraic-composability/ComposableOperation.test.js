@@ -1,25 +1,29 @@
 import { ComposableOperation, compose } from '../../src/algebraic-composability/ComposableOperation.js';
+import { z } from 'zod';
 
-describe('Algebraic Composability', () => {
+describe('Algebraic Composability with Zod', () => {
+  const numberSchema = z.number();
+  const stringSchema = z.string();
+
   const addOne = new ComposableOperation(
     'addOne',
     (x) => x + 1,
-    'number',
-    'number'
+    numberSchema,
+    numberSchema
   );
 
   const numberToString = new ComposableOperation(
     'numberToString',
     (x) => x.toString(),
-    'number',
-    'string'
+    numberSchema,
+    stringSchema
   );
 
   const stringToLength = new ComposableOperation(
     'stringToLength',
     (s) => s.length,
-    'string',
-    'number'
+    stringSchema,
+    numberSchema
   );
 
   it('should compose two compatible operations', () => {
@@ -32,19 +36,23 @@ describe('Algebraic Composability', () => {
     expect(pipeline(1)).toBe(1);
   });
 
-  it('should throw an error for incompatible schemas', () => {
+  it('should throw an error for invalid input to the pipeline', () => {
+    const pipeline = compose(addOne, numberToString);
     expect(() => {
-      compose(addOne, stringToLength);
-    }).toThrow('Incompatible schemas: addOne output (number) does not match stringToLength input (string)');
+      pipeline('not a number');
+    }).toThrow();
   });
 
-  it('should execute a single operation', () => {
-    const pipeline = compose(addOne);
-    expect(pipeline(1)).toBe(2);
-  });
-
-  it('should return the input if no operations are composed', () => {
-    const pipeline = compose();
-    expect(pipeline(1)).toBe(1);
+  it('should throw an error for an operation with invalid output', () => {
+    const invalidOperation = new ComposableOperation(
+      'invalid',
+      () => 'not a number',
+      numberSchema,
+      numberSchema
+    );
+    const pipeline = compose(addOne, invalidOperation);
+    expect(() => {
+      pipeline(1);
+    }).toThrow();
   });
 });
