@@ -4,12 +4,15 @@
  * Optimizes across N dimensions: cpu, energy, memory, bandwidth
  * Uses Pareto dominance for multi-objective optimization
  */
+import { SimulatedCarbonIntensityAPI } from './SimulatedCarbonIntensityAPI.js';
+
 export default class ResourceAwareScheduler {
-  constructor(budgets) {
-    this.budgets = budgets; // {cpu: X, energy: Y, memory: Z, bandwidth: W}
+  constructor(budgets, carbonIntensityAPI) {
+    this.budgets = budgets; // {cpu: X, energy: Y, memory: Z, bandwidth: W, carbon: C}
     this.consumed = Object.keys(budgets).reduce((acc, k) => ({...acc, [k]: 0}), {});
     this.tasks = [];
     this.rejections = [];
+    this.carbonIntensityAPI = carbonIntensityAPI || new SimulatedCarbonIntensityAPI('default');
   }
 
   /**
@@ -22,12 +25,16 @@ export default class ResourceAwareScheduler {
   estimateCost(task) {
     const ops = task.operations || 1e6;
     const dataSize = task.dataSize || 1e3;
+    const energy = ops * 1e-9; // Joules (1nJ per operation)
+    const carbonIntensity = this.carbonIntensityAPI.getCarbonIntensity(); // gCO2eq/kWh
+    const carbon = (energy / 3.6e6) * carbonIntensity; // Convert Joules to kWh, then multiply by intensity
 
     return {
-      cpu: ops / 1e9,              // CPU-seconds
-      energy: ops * 1e-9,          // Joules (1nJ per operation)
-      memory: dataSize,             // Bytes
-      bandwidth: task.network ? dataSize : 0
+      cpu: ops / 1e9, // CPU-seconds
+      energy: energy,
+      memory: dataSize, // Bytes
+      bandwidth: task.network ? dataSize : 0,
+      carbon: carbon,
     };
   }
 
@@ -106,6 +113,9 @@ export default class ResourceAwareScheduler {
    * Find schedule that maximizes value while respecting constraints
    */
   optimizeSchedule(candidateTasks) {
+    const carbonIntensity = this.carbonIntensityAPI.getCarbonIntensity();
+    const lowCarbonThreshold = 200; // gCO2eq/kWh
+
     // Efficiency = value / total_cost
     const scored = candidateTasks.map(task => {
       const cost = this.estimateCost(task);
@@ -116,7 +126,12 @@ export default class ResourceAwareScheduler {
         return sum + (cost[resource] / this.budgets[resource]);
       }, 0);
 
-      const efficiency = (task.value || 1) / (normalizedCost + 1e-6);
+      let efficiency = (task.value || 1) / (normalizedCost + 1e-6);
+
+      // If carbon intensity is low, boost the efficiency of carbon-sensitive tasks
+      if (task.carbonSensitive && carbonIntensity < lowCarbonThreshold) {
+        efficiency *= 3.0; // 200% boost
+      }
 
       return {task, efficiency, cost};
     });
