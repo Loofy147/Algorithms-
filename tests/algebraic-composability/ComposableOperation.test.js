@@ -55,4 +55,27 @@ describe('Algebraic Composability with Zod', () => {
       pipeline(1);
     }).toThrow();
   });
+
+  it('should throw a runtime error when executing with incompatible schemas', () => {
+    const stringOp = new ComposableOperation(
+      'stringOp',
+      (s) => s.length,
+      stringSchema,
+      numberSchema
+    );
+    const numberOp = new ComposableOperation(
+      'numberOp',
+      (n) => n + 1,
+      numberSchema,
+      numberSchema
+    );
+
+    // The output of numberOp (number) is incompatible with the input of stringOp (string).
+    const pipeline = compose(numberOp, stringOp);
+
+    // The error should be thrown at runtime when the data is passed.
+    expect(() => {
+      pipeline(1);
+    }).toThrow(); // Zod will throw ZodError during parsing
+  });
 });

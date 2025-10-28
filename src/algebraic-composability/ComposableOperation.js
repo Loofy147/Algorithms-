@@ -10,11 +10,12 @@ export class ComposableOperation {
    * @param {z.ZodType<any, any>} inputSchema - The Zod schema for the input.
    * @param {z.ZodType<any, any>} outputSchema - The Zod schema for the output.
    */
-  constructor(name, operation, inputSchema, outputSchema) {
+  constructor(name, operation, inputSchema, outputSchema, rollback) {
     this.name = name;
     this.operation = operation;
     this.inputSchema = inputSchema;
     this.outputSchema = outputSchema;
+    this.rollback = rollback;
   }
 
   /**
@@ -53,5 +54,35 @@ export function compose(...operations) {
 
   return function (input) {
     return operations.reduce((acc, op) => op.execute(acc), input);
+  };
+}
+
+/**
+ * Composes multiple operations into a single transactional pipeline.
+ * @param {...ComposableOperation} operations - The operations to compose.
+ * @returns {(input: any) => any} A new function that executes the composed operations as a transaction.
+ */
+export function composeWithTransaction(...operations) {
+  return function (input) {
+    const successfulOperations = [];
+    let
+
+currentValue = input;
+
+    try {
+      for (const op of operations) {
+        currentValue = op.execute(currentValue);
+        successfulOperations.push(op);
+      }
+      return currentValue;
+    } catch (error) {
+      for (let i = successfulOperations.length - 1; i >= 0; i--) {
+        const op = successfulOperations[i];
+        if (op.rollback) {
+          op.rollback();
+        }
+      }
+      throw error;
+    }
   };
 }
