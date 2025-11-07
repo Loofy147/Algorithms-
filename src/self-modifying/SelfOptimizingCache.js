@@ -2,10 +2,6 @@ import { config } from '../config.js';
 import { logger } from '../logger.js';
 import { LRUCache, LFUCache, FIFOCache } from './CachingStrategies.js';
 
-/**
- * A self-optimizing cache that uses a multi-armed bandit algorithm (Epsilon-Greedy)
- * to dynamically select the best caching strategy.
- */
 export default class SelfOptimizingCache {
   constructor(capacity = config.cache.capacity, { epsilon = config.cache.epsilon, evaluationInterval = 100 } = {}) {
     this.capacity = capacity;
@@ -21,7 +17,6 @@ export default class SelfOptimizingCache {
   }
 
   get(key) {
-    this._onOperation();
     let result = null;
     for (const name in this.strategies) {
       const value = this.strategies[name].get(key);
@@ -29,14 +24,15 @@ export default class SelfOptimizingCache {
         result = value;
       }
     }
+    this._onOperation();
     return result;
   }
 
   put(key, value) {
-    this._onOperation();
     for (const name in this.strategies) {
       this.strategies[name].put(key, value);
     }
+    this._onOperation();
   }
 
   _onOperation() {

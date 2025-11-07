@@ -1,56 +1,35 @@
 import SelfOptimizingCache from '../src/self-modifying/SelfOptimizingCache.js';
+import { logger } from '../src/logger.js';
 
-/**
- * Use Case: Adaptive Content Delivery Network (CDN) Caching
- *
- * A CDN needs to cache content close to users. The optimal caching strategy
- * (e.g., LRU, LFU, FIFO) can change depending on the time of day, the type of
- * content being requested, or sudden viral traffic patterns.
- *
- * A `SelfOptimizingCache` can dynamically adapt to find the best caching
- * strategy. It runs multiple strategies in parallel, measures their hit rates,
- * and automatically shifts traffic to the best-performing one using a
-- * multi-armed bandit algorithm. This ensures the CDN always uses the most
- * effective caching logic for the current traffic pattern.
- */
 function adaptiveCDNCaching() {
-  console.log('--- Self-Modifying Algorithm Use Case: Adaptive CDN Caching ---');
+  logger.info('--- Self-Modifying Algorithm Use Case: Adaptive CDN Caching ---');
 
-  const cache = new SelfOptimizingCache(10, 0.1); // Capacity 10, Epsilon (exploration) 0.1
+  const cache = new SelfOptimizingCache(10);
 
-  console.log('Phase 1: Initial requests - mixed access pattern.');
-  // Simulate some initial traffic
-  for (let i = 0; i < 20; i++) {
-    cache.get(`item:${i % 10}`); // Access items 0-9 twice
+  logger.info('Phase 1: Warming the cache with initial content.');
+  for (let i = 0; i < 10; i++) {
+    cache.put(`item:${i}`, `content:${i}`);
   }
-  for (let i = 0; i < 5; i++) {
-    cache.get('item:popular'); // Access one item frequently
-  }
-  console.log('Current best strategy:', cache.getCurrentStrategyName());
 
-  console.log('\nPhase 2: Viral content - LFU becomes optimal.');
-  // A single item goes viral, making LFU the best strategy
+  logger.info('Phase 2: Simulating a viral content pattern (good for LFU).');
   for (let i = 0; i < 100; i++) {
-    cache.get('item:viral');
-    if (i % 20 === 0) {
-      console.log(`  - After ${i} viral hits, best strategy is: ${cache.getCurrentStrategyName()}`);
+    // One item is requested 80% of the time
+    if (Math.random() < 0.8) {
+      cache.get('item:5');
+    } else {
+      cache.get(`item:${i % 10}`);
     }
   }
+  logger.info({ stats: cache.getStats() }, 'Cache stats after viral pattern');
 
-  console.log('\nPhase 3: Scanning pattern - LRU becomes optimal.');
-  // A user scans through many unique items, making LRU better
-  for (let i = 100; i < 200; i++) {
+  logger.info('Phase 3: Simulating a scanning pattern (good for LRU).');
+  // New, unique items are requested, pushing out the old "viral" content.
+  for (let i = 10; i < 110; i++) {
     cache.get(`item:${i}`);
-    if (i % 20 === 0) {
-      console.log(`  - After ${i-100} sequential hits, best strategy is: ${cache.getCurrentStrategyName()}`);
-    }
   }
+  logger.info({ stats: cache.getStats() }, 'Cache stats after scanning pattern');
 
-  console.log('\n--- Final Cache Stats ---');
-  console.log(cache.getStats());
-
-  console.log('\nConclusion: The cache adapted its internal strategy from LRU to LFU and back to LRU');
-  console.log('based on the changing access patterns, maximizing the cache hit rate automatically.');
+  logger.info('Conclusion: The cache dynamically adapted its strategy based on the workload.');
 }
 
 adaptiveCDNCaching();
