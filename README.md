@@ -1,29 +1,66 @@
-# Advanced Computational Principles
+# Advanced Computational Principles: A Production-Ready Toolkit
 
-This project provides production-ready implementations of seven fundamental computational principles that are often overlooked in traditional computer science education. These principles are essential for building robust, efficient, and secure real-world systems.
+This project provides production-ready JavaScript implementations of seven advanced computational principles. These concepts, often confined to academic papers, are essential for building robust, efficient, and secure real-world systems. This toolkit is designed not just for learning, but as a reliable foundation for production use.
 
-For detailed information on the theory, research, and implementation of each principle, please see the documentation in the `docs/` directory.
+Our development is guided by a strict **[Professional Working Methodology](./METHODOLOGY.md)**, emphasizing a research-implement-verify workflow to ensure the highest quality.
 
 ## Principles Implemented
 
-- **[Time-Aware Computing](./docs/time_aware_computing.md)**: Algorithms that treat time as a primary constraint.
-- **[Resource-Aware Computing](./docs/resource_aware_computing.md)**: Multi-objective optimization for resources like energy, memory, and bandwidth.
-- **[Adversarial-First Design](./docs/adversarial_first_design.md)**: A security-focused approach to software development.
-- **[Algebraic Composability](./docs/algebraic_composability.md)**: Creating components that can be combined in provably correct ways.
-- **[Uncertainty Quantification](./docs/uncertainty_quantification.md)**: Quantitatively estimating the doubt in a model's prediction.
-- **[Self-Modifying Algorithms](./docs/self_modifying_algorithms.md)**: Algorithms that can change their own behavior in response to their environment.
-- **[Causal Reasoning](./docs/causal_reasoning.md)**: Identifying and understanding cause-and-effect relationships.
+Each principle is implemented as a self-contained, professional-grade module. For detailed documentation on the theory and research behind each, please see the `docs/` directory.
+
+| Principle | Key Implementation | Description | Use Case |
+| :--- | :--- | :--- | :--- |
+| **Time-Aware Computing** | `AnytimeQuicksort` | An algorithm that provides the best possible result within a strict time budget. | **[Real-time UI](./examples/time-aware-use-case.js)** |
+| **Resource-Aware Computing**| `ResourceAwareScheduler` | A multi-objective scheduler that optimizes for CPU, energy, and carbon. | **[Cloud Cost Management](./examples/resource-aware-use-case.js)** |
+| **Adversarial-First Design**| `SecureHashMap` | A hash map resistant to collision-based denial-of-service attacks. | **[Secure Caching Server](./examples/adversarial-first-use-case.js)** |
+| **Algebraic Composability**| `composeWithTransaction`| A Saga-pattern orchestrator for building resilient, multi-step transactions. | **[Financial Transaction](./examples/algebraic-composability-use-case.js)** |
+| **Causal Reasoning** | `CausalAnalyzer` | A tool for identifying Simpson's Paradox and confounding variables. | **[A/B Test Analysis](./examples/causal-reasoning-use-case.js)** |
+| **Self-Modifying Algorithms**| `SelfOptimizingCache`| A cache that uses a multi-armed bandit to dynamically select the best strategy.| **[Adaptive CDN](./examples/self-modifying-use-case.js)** |
+| **Uncertainty Quantification**| `ProbabilisticCounter`| A counter that provides statistically sound confidence intervals (Wilson, Agresti-Coull). | **[Real-time Polling](./examples/uncertainty-quantification-use-case.js)** |
+
+## Production-Ready Features
+
+This is more than a reference implementation. It's a professional toolkit built with:
+
+- **Centralized Configuration**: All algorithmic parameters are managed in `src/config.js` and can be overridden with environment variables.
+- **Structured Logging**: The entire system uses `pino` for structured, leveled logging, essential for production observability.
+- **Custom Error Handling**: Specific, custom error types (e.g., `TransactionError`) allow for robust and predictable error handling.
+- **Comprehensive Testing**: The project is validated with unit, integration, and performance tests.
 
 ## Getting Started
 
-To install the dependencies, run:
+### Prerequisites
+
+- Node.js >= 18.0
+- npm
+
+### Installation
 
 ```bash
 npm install
 ```
 
-To run the tests, run:
+### Running the Use Cases
+
+The `examples/` directory contains a runnable, real-world use case for each principle.
 
 ```bash
-npm test
+# Example: Run the Causal Reasoning use case
+node examples/causal-reasoning-use-case.js
 ```
+
+### Running Tests
+
+The project has a full test suite.
+
+```bash
+# Run all tests
+npm test
+
+# Run a specific test file
+npm test -- tests/time-aware/AnytimeQuicksort.test.js
+```
+
+### Deployment
+
+This project can be deployed as a containerized application. For detailed instructions on deploying to a cloud environment, see the **[Hugging Face Deployment Guide](./DEPLOY_TO_HUGGINGFACE.md)**.

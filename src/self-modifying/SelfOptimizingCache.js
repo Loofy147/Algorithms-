@@ -1,3 +1,5 @@
+import { config } from '../config.js';
+import { logger } from '../logger.js';
 import { LRUCache, LFUCache, FIFOCache } from './CachingStrategies.js';
 
 /**
@@ -5,18 +7,16 @@ import { LRUCache, LFUCache, FIFOCache } from './CachingStrategies.js';
  * to dynamically select the best caching strategy.
  */
 export default class SelfOptimizingCache {
-  constructor(capacity, { epsilon = 0.1, evaluationInterval = 100 } = {}) {
+  constructor(capacity = config.cache.capacity, { epsilon = config.cache.epsilon, evaluationInterval = 100 } = {}) {
     this.capacity = capacity;
     this.epsilon = epsilon;
     this.evaluationInterval = evaluationInterval;
     this.operationCount = 0;
-
     this.strategies = {
       LRU: new LRUCache(capacity),
       LFU: new LFUCache(capacity),
       FIFO: new FIFOCache(capacity),
     };
-
     this.currentStrategyName = 'LRU';
   }
 
@@ -34,7 +34,6 @@ export default class SelfOptimizingCache {
 
   put(key, value) {
     this._onOperation();
-    // Mirror the put operation across all strategies to keep their content in sync.
     for (const name in this.strategies) {
       this.strategies[name].put(key, value);
     }
@@ -47,17 +46,12 @@ export default class SelfOptimizingCache {
     }
   }
 
-  /**
-   * Epsilon-Greedy strategy selection.
-   */
   _selectStrategy() {
-    // With probability epsilon, explore a random strategy.
     if (Math.random() < this.epsilon) {
       const strategyNames = Object.keys(this.strategies);
       this.currentStrategyName = strategyNames[Math.floor(Math.random() * strategyNames.length)];
-      console.log(`Exploring new strategy: ${this.currentStrategyName}`);
+      logger.info({ strategy: this.currentStrategyName }, 'Exploring new cache strategy');
     } else {
-      // Otherwise, exploit the strategy with the best hit rate.
       let bestStrategyName = 'LRU';
       let bestHitRate = -1;
       for (const name in this.strategies) {
@@ -68,7 +62,7 @@ export default class SelfOptimizingCache {
         }
       }
       if (this.currentStrategyName !== bestStrategyName) {
-        console.log(`Switching to best strategy: ${bestStrategyName} (Hit Rate: ${bestHitRate.toFixed(2)})`);
+        logger.info({ newStrategy: bestStrategyName, oldStrategy: this.currentStrategyName, hitRate: bestHitRate }, 'Switching to best cache strategy');
         this.currentStrategyName = bestStrategyName;
       }
     }

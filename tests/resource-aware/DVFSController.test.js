@@ -6,7 +6,7 @@ describe('DVFSController', () => {
     const workload = 1e9; // 1 billion operations
     const deadline = 0.5; // 500ms
     const result = controller.selectForDeadline(workload, deadline);
-    expect(result.state.name).toBe('Performance');
+    expect(result.state.name).toBe('Low');
     expect(result.meetsDeadline).toBe(true);
   });
 

@@ -18,7 +18,9 @@ describe('ResourceAwareScheduler', () => {
         execute: () => 'task1_complete'
       }
     ];
-    const schedule = scheduler.optimizeSchedule(tasks);
+    const { schedule, rejections } = scheduler.optimizeSchedule(tasks);
+    expect(schedule).toHaveLength(1);
+    expect(rejections).toHaveLength(0);
     expect(schedule[0].scheduled).toBe(true);
   });
 
@@ -39,7 +41,9 @@ describe('ResourceAwareScheduler', () => {
         execute: () => 'task1_complete'
       }
     ];
-    const schedule = scheduler.optimizeSchedule(tasks);
-    expect(schedule[0].scheduled).toBe(false);
+    const { schedule, rejections } = scheduler.optimizeSchedule(tasks);
+    expect(schedule).toHaveLength(0);
+    expect(rejections).toHaveLength(1);
+    expect(rejections[0].scheduled).toBe(false);
   });
 });

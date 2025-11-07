@@ -37,8 +37,8 @@ describe('Carbon-Aware Scheduling', () => {
     const lowIntensityScheduler = new ResourceAwareScheduler(budgets, lowIntensityAPI);
     const highIntensityScheduler = new ResourceAwareScheduler(budgets, highIntensityAPI);
 
-    const lowIntensitySchedule = lowIntensityScheduler.optimizeSchedule(tasks);
-    const highIntensitySchedule = highIntensityScheduler.optimizeSchedule(tasks);
+    const { schedule: lowIntensitySchedule } = lowIntensityScheduler.optimizeSchedule(tasks);
+    const { schedule: highIntensitySchedule } = highIntensityScheduler.optimizeSchedule(tasks);
 
     // At low intensity, the carbon-sensitive task should be prioritized
     expect(lowIntensitySchedule[0].task).toBe('Low-Value, Carbon-Sensitive');

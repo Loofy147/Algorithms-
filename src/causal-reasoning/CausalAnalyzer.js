@@ -25,30 +25,40 @@ export class CausalAnalyzer {
    */
   analyze() {
     const overallTrend = this._calculateTrend(this.data);
-    const segmentedTrends = this._calculateSegmentedTrends();
+    const segmentedAnalysis = this._calculateSegmentedTrends();
 
     return {
       overallTrend,
-      segmentedTrends,
-      paradox: this._detectParadox(overallTrend, segmentedTrends),
+      segmentedTrends: Object.fromEntries(
+        Object.entries(segmentedAnalysis).map(([key, { trend }]) => [key, trend])
+      ),
+      paradox: this._detectParadox(overallTrend, segmentedAnalysis),
     };
   }
 
   _calculateTrend(data) {
-    if (data.length === 0) return 0;
+    if (data.length < 2) return 0;
     const groups = this._groupBy(data, this.independentVar);
-    const successRateA = this._calculateSuccessRate(groups['A'] || []);
-    const successRateB = this._calculateSuccessRate(groups['B'] || []);
+    const groupKeys = Object.keys(groups).sort();
+
+    if (groupKeys.length < 2) return 0;
+
+    // For simplicity, trend is calculated between the first two lexicographically sorted groups.
+    const successRateA = this._calculateSuccessRate(groups[groupKeys[0]] || []);
+    const successRateB = this._calculateSuccessRate(groups[groupKeys[1]] || []);
     return successRateB - successRateA;
   }
 
   _calculateSegmentedTrends() {
     const segments = this._groupBy(this.data, this.confoundingVar);
-    const trends = {};
+    const analysis = {};
     for (const segment in segments) {
-      trends[segment] = this._calculateTrend(segments[segment]);
+      analysis[segment] = {
+        trend: this._calculateTrend(segments[segment]),
+        size: segments[segment].length
+      };
     }
-    return trends;
+    return analysis;
   }
 
   _calculateSuccessRate(data) {
@@ -64,9 +74,28 @@ export class CausalAnalyzer {
     }, {});
   }
 
-  _detectParadox(overallTrend, segmentedTrends) {
+  _detectParadox(overallTrend, segmentedAnalysis) {
     const overallSign = Math.sign(overallTrend);
-    const segmentSigns = Object.values(segmentedTrends).map(Math.sign);
-    return segmentSigns.every((sign) => sign !== 0 && sign !== overallSign);
+    if (overallSign === 0) return false;
+
+    const segments = Object.values(segmentedAnalysis);
+    if (segments.length === 0) return false;
+
+    // Strict paradox: trend reverses in ALL segments.
+    const allReverse = segments.every(
+      ({ trend }) => Math.sign(trend) === -overallSign
+    );
+    if (allReverse) return true;
+
+    // Weighted paradox: the weighted average of segment trends reverses.
+    const totalWeight = segments.reduce((sum, { size }) => sum + size, 0);
+    if (totalWeight === 0) return false;
+
+    const weightedTrend = segments.reduce(
+      (sum, { trend, size }) => sum + trend * size,
+      0
+    ) / totalWeight;
+
+    return Math.sign(weightedTrend) === -overallSign;
   }
 }

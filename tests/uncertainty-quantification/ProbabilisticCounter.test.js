@@ -1,10 +1,11 @@
-import ProbabilisticCounter from '../../src/uncertainty-quantification/ProbabilisticCounter.js';
+import { ProbabilisticCounter } from '../../src/uncertainty-quantification/ProbabilisticCounter.js';
 
 describe('ProbabilisticCounter', () => {
   it('should initialize with zero counts', () => {
     const counter = new ProbabilisticCounter();
-    expect(counter.getCount()).toBe(0);
-    expect(counter.trials).toBe(0);
+    const counts = counter.getCounts();
+    expect(counts.successes).toBe(0);
+    expect(counts.trials).toBe(0);
   });
 
   it('should increment the counts correctly', () => {
@@ -12,8 +13,9 @@ describe('ProbabilisticCounter', () => {
     counter.increment(true);
     counter.increment(true);
     counter.increment(false);
-    expect(counter.getCount()).toBe(2);
-    expect(counter.trials).toBe(3);
+    const counts = counter.getCounts();
+    expect(counts.successes).toBe(2);
+    expect(counts.trials).toBe(3);
   });
 
   it('should calculate the confidence interval correctly', () => {

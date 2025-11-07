@@ -9,9 +9,12 @@ describe('WCETAnalyzer', () => {
         sum += i;
       }
     };
-    const analysis = analyzer.measure(testFunction, 100);
-    expect(analysis.samples).toBe(100);
-    expect(analysis.mean).toBeGreaterThan(0);
-    expect(analysis.wcet_estimate).toBeGreaterThan(0);
+    analyzer.measure(testFunction, 100);
+    expect(analyzer.samples).toHaveLength(100);
+
+    const gumbel = analyzer.fitGumbel(analyzer.samples);
+    expect(gumbel.location).toBeDefined();
+    expect(gumbel.scale).toBeDefined();
+    expect(gumbel.predictWCET(0.999)).toBeGreaterThan(0);
   });
 });

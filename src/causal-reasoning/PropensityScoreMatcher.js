@@ -1,74 +1,103 @@
-/**
- * @file PropensityScoreMatcher.js
- * @description An implementation of propensity score matching for causal inference.
- */
+import { config } from '../config.js';
+import { logger } from '../logger.js';
 
 /**
- * A class to perform propensity score matching.
+ * Implements Propensity Score Matching for causal inference.
  */
 export class PropensityScoreMatcher {
-  /**
-   * @param {object[]} dataset - The dataset to analyze.
-   * @param {string} treatment - The name of the treatment variable.
-   * @param {string} outcome - The name of the outcome variable.
-   * @param {string[]} covariates - An array of covariate names.
-   */
   constructor(dataset, treatment, outcome, covariates) {
     this.dataset = dataset;
     this.treatment = treatment;
     this.outcome = outcome;
     this.covariates = covariates;
+    this.propensityScores = null;
   }
 
   /**
    * Fits a logistic regression model to estimate propensity scores.
-   * @returns {number[]} An array of propensity scores.
+   * This implementation uses gradient descent with L2 regularization and a convergence check.
    */
   fit() {
-    const { dataset, treatment, covariates } = this;
-    const X = dataset.map((d) => [1, ...covariates.map((c) => d[c])]);
-    const y = dataset.map((d) => d[treatment]);
+    const { learningRate, iterations, regularization, convergenceThreshold = 1e-6 } = config.logisticRegression;
+
+    const X = this.dataset.map(d => [1, ...this.covariates.map(c => d[c])]); // Add bias term
+    const y = this.dataset.map(d => d[this.treatment]);
     let weights = Array(X[0].length).fill(0);
+    let lastCost = Infinity;
 
-    const sigmoid = (z) => 1 / (1 + Math.exp(-z));
+    const sigmoid = z => 1 / (1 + Math.exp(-z));
 
-    for (let i = 0; i < 100; i++) {
-      const predictions = X.map((x) => sigmoid(x.reduce((acc, val, j) => acc + val * weights[j], 0)));
-      const errors = y.map((val, j) => val - predictions[j]);
-      const gradient = X[0].map((_, j) => X.reduce((acc, x, k) => acc + x[j] * errors[k], 0));
-      weights = weights.map((w, j) => w + 0.01 * gradient[j]);
+    for (let i = 0; i < iterations; i++) {
+      const predictions = X.map(x => sigmoid(x.reduce((acc, val, j) => acc + val * weights[j], 0)));
+
+      // Calculate cost (log-likelihood with L2 regularization)
+      const cost = -y.reduce((sum, yi, k) =>
+        sum + (yi * Math.log(predictions[k]) + (1 - yi) * Math.log(1 - predictions[k])), 0) / y.length +
+        (regularization / (2 * y.length)) * weights.slice(1).reduce((sum, w) => sum + w * w, 0);
+
+      // Check for convergence
+      if (Math.abs(lastCost - cost) < convergenceThreshold && i > 0) {
+        logger.info({ iteration: i, cost }, 'Logistic regression converged');
+        break;
+      }
+      lastCost = cost;
+
+      const errors = y.map((val, j) => predictions[j] - val);
+
+      const gradient = X[0].map((_, j) =>
+        X.reduce((sum, x, k) => sum + x[j] * errors[k], 0) / y.length
+      );
+
+      // Update weights with regularization (don't regularize bias term)
+      weights = weights.map((w, j) =>
+        w - learningRate * (gradient[j] + (j > 0 ? (regularization / y.length) * w : 0))
+      );
+
+      if (i === iterations - 1) {
+        logger.warn('Logistic regression reached max iterations without converging.');
+      }
     }
 
-    this.propensityScores = X.map((x) => sigmoid(x.reduce((acc, val, j) => acc + val * weights[j], 0)));
+    this.propensityScores = X.map(x => sigmoid(x.reduce((acc, val, j) => acc + val * weights[j], 0)));
     return this.propensityScores;
   }
 
   /**
-   * Matches treated and control subjects and estimates the treatment effect.
+   * Matches treated and control subjects using nearest-neighbor matching on propensity scores.
    * @returns {number} The Average Treatment Effect on the Treated (ATT).
    */
   match() {
-    const { dataset, treatment, outcome, propensityScores } = this;
-    const treated = dataset.filter((d) => d[treatment] === 1);
-    const control = dataset.filter((d) => d[treatment] === 0);
-    const treatedScores = propensityScores.filter((_, i) => dataset[i][treatment] === 1);
-    const controlScores = propensityScores.filter((_, i) => dataset[i][treatment] === 0);
+    if (!this.propensityScores) {
+      throw new Error('You must call fit() before match().');
+    }
+
+    const treatedIndices = this.dataset.map((d, i) => d[this.treatment] === 1 ? i : -1).filter(i => i !== -1);
+    const controlIndices = this.dataset.map((d, i) => d[this.treatment] === 0 ? i : -1).filter(i => i !== -1);
+
+    if (treatedIndices.length === 0 || controlIndices.length === 0) {
+        logger.warn('Dataset contains no treated or no control subjects. Cannot calculate ATT.');
+        return 0;
+    }
 
     let totalEffect = 0;
-    for (let i = 0; i < treated.length; i++) {
-      const treatedScore = treatedScores[i];
+    for (const i of treatedIndices) {
+      const treatedScore = this.propensityScores[i];
       let bestMatchIndex = -1;
       let minDistance = Infinity;
-      for (let j = 0; j < control.length; j++) {
-        const distance = Math.abs(treatedScore - controlScores[j]);
+
+      for (const j of controlIndices) {
+        const distance = Math.abs(treatedScore - this.propensityScores[j]);
         if (distance < minDistance) {
           minDistance = distance;
           bestMatchIndex = j;
         }
       }
-      totalEffect += treated[i][outcome] - control[bestMatchIndex][outcome];
+
+      if (bestMatchIndex !== -1) {
+        totalEffect += this.dataset[i][this.outcome] - this.dataset[bestMatchIndex][this.outcome];
+      }
     }
 
-    return totalEffect / treated.length;
+    return totalEffect / treatedIndices.length;
   }
 }

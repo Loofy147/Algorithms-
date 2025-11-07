@@ -1,14 +1,10 @@
-/**
- * @file GeneticAlgorithm.js
- * @description An implementation of a genetic algorithm to solve the traveling salesman problem.
- */
+import { config } from '../config.js';
 
 export class City {
   constructor(x, y) {
     this.x = x;
     this.y = y;
   }
-
   distanceTo(city) {
     const xDistance = Math.abs(this.x - city.x);
     const yDistance = Math.abs(this.y - city.y);
@@ -22,7 +18,6 @@ export class Chromosome {
     this.cities = cities;
     this.distance = this.calculateDistance();
   }
-
   calculateDistance() {
     let totalDistance = 0;
     for (let i = 0; i < this.genes.length - 1; i++) {
@@ -41,7 +36,6 @@ export class Population {
       this.chromosomes.push(this.createRandomChromosome(numCities));
     }
   }
-
   createRandomChromosome(numCities) {
     const genes = [...Array(numCities).keys()];
     for (let i = genes.length - 1; i > 0; i--) {
@@ -50,14 +44,18 @@ export class Population {
     }
     return new Chromosome(genes, this.cities);
   }
-
   getFittest() {
     return this.chromosomes.reduce((a, b) => (a.distance < b.distance ? a : b));
   }
 }
 
 export class GeneticAlgorithm {
-  constructor(populationSize, numCities, mutationRate, crossoverRate, cities) {
+  constructor(numCities, cities, options = {}) {
+    const {
+      populationSize = config.geneticAlgorithm.populationSize,
+      mutationRate = config.geneticAlgorithm.mutationRate,
+      crossoverRate = config.geneticAlgorithm.crossoverRate
+    } = options;
     this.population = new Population(populationSize, numCities, cities);
     this.mutationRate = mutationRate;
     this.crossoverRate = crossoverRate;
@@ -65,22 +63,18 @@ export class GeneticAlgorithm {
   }
 
   evolve() {
-    const newChromosomes = [];
-    newChromosomes.push(this.population.getFittest());
-
-    for (let i = 1; i < this.population.chromosomes.length; i++) {
+    const newChromosomes = [this.population.getFittest()]; // Elitism
+    while (newChromosomes.length < this.population.chromosomes.length) {
       const parent1 = this.tournamentSelection();
       const parent2 = this.tournamentSelection();
       const offspring = this.crossover(parent1, parent2);
       this.mutate(offspring);
       newChromosomes.push(offspring);
     }
-
     this.population.chromosomes = newChromosomes;
   }
 
-  tournamentSelection() {
-    const tournamentSize = 5;
+  tournamentSelection(tournamentSize = 5) {
     let fittest = null;
     for (let i = 0; i < tournamentSize; i++) {
       const randomIndex = Math.floor(Math.random() * this.population.chromosomes.length);
@@ -93,20 +87,26 @@ export class GeneticAlgorithm {
   }
 
   crossover(parent1, parent2) {
-    const offspringGenes = [];
-    if (Math.random() < this.crossoverRate) {
-      const start = Math.floor(Math.random() * parent1.genes.length);
-      const end = Math.floor(Math.random() * (parent1.genes.length - start)) + start;
-      offspringGenes.push(...parent1.genes.slice(start, end));
-      for (const gene of parent2.genes) {
-        if (!offspringGenes.includes(gene)) {
-          offspringGenes.push(gene);
-        }
-      }
-    } else {
-      offspringGenes.push(...parent1.genes);
+    if (Math.random() > this.crossoverRate) {
+      // No crossover, return a clone of the first parent
+      return new Chromosome([...parent1.genes], this.cities);
     }
-    return new Chromosome(offspringGenes, this.cities);
+
+    const start = Math.floor(Math.random() * parent1.genes.length);
+    const end = Math.floor(Math.random() * (parent1.genes.length - start)) + start + 1;
+
+    const offspringGenes = parent1.genes.slice(start, end);
+    const parent2Genes = parent2.genes.filter(gene => !offspringGenes.includes(gene));
+
+    const finalGenes = [...offspringGenes, ...parent2Genes];
+
+    // This ensures the offspring is always a valid permutation
+    if (finalGenes.length !== parent1.genes.length) {
+        // Fallback in case of logic error, though the above should be correct.
+        return new Chromosome([...parent1.genes], this.cities);
+    }
+
+    return new Chromosome(finalGenes, this.cities);
   }
 
   mutate(chromosome) {
@@ -116,5 +116,7 @@ export class GeneticAlgorithm {
         [chromosome.genes[i], chromosome.genes[j]] = [chromosome.genes[j], chromosome.genes[i]];
       }
     }
+    // After mutation, the distance needs to be recalculated.
+    chromosome.distance = chromosome.calculateDistance();
   }
 }
