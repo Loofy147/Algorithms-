@@ -61,6 +61,16 @@ npm test
 npm test -- tests/time-aware/AnytimeQuicksort.test.js
 ```
 
+### API Documentation
+
+This project uses JSDoc for all public APIs. You can generate a full API documentation website by running:
+
+```bash
+npm run docs:generate
+```
+
+This will create a `docs/api` directory with a searchable, navigable website detailing all classes and methods.
+
 ### Deployment
 
 This project can be deployed as a containerized application. For detailed instructions on deploying to a cloud environment, see the **[Hugging Face Deployment Guide](./DEPLOY_TO_HUGGINGFACE.md)**.
