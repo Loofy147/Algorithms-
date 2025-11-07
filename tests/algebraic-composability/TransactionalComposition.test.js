@@ -2,7 +2,7 @@ import { ComposableOperation, composeWithTransaction } from '../../src/algebraic
 import { z } from 'zod';
 
 describe('Transactional Composability', () => {
-  it('should roll back completed operations if a subsequent one fails', () => {
+  it('should roll back completed operations if a subsequent one fails', async () => {
     let a = 0;
     let b = 0;
 
@@ -43,9 +43,7 @@ describe('Transactional Composability', () => {
 
     const pipeline = composeWithTransaction(op1, op2, op3);
 
-    expect(() => {
-      pipeline(1);
-    }).toThrow('op3 failed');
+    await expect(pipeline(1)).rejects.toThrow('op3 failed');
 
     expect(a).toBe(0);
     expect(b).toBe(0);
