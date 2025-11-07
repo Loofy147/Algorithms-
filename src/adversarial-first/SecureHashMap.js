@@ -1,62 +1,73 @@
 import { config } from '../config.js';
 import { logger } from '../logger.js';
 
-/**
- * Adversarial-Resistant HashMap
- *
- * Defenses:
- * 1. Randomized hash function (SipHash-style)
- * 2. Collision attack detection
- * 3. Automatic rehashing under attack
- * 4. Constant-time operations (timing attack resistant)
- */
+// Helper for 64-bit BigInt rotation.
+const rotl64 = (x, b) => (x << b) | (x >> (64n - b));
+
+function siphash24(msg, k0, k1) {
+    let v0 = 0x736f6d6570736575n ^ k0;
+    let v1 = 0x646f72616e646f6dn ^ k1;
+    let v2 = 0x6c7967656e657261n ^ k0;
+    let v3 = 0x7465646279746573n ^ k1;
+
+    const sipRound = () => {
+        v0 = (v0 + v1) & 0xFFFFFFFFFFFFFFFFn; v1 = rotl64(v1, 13n); v1 ^= v0; v0 = rotl64(v0, 32n);
+        v2 = (v2 + v3) & 0xFFFFFFFFFFFFFFFFn; v3 = rotl64(v3, 16n); v3 ^= v2;
+        v0 = (v0 + v3) & 0xFFFFFFFFFFFFFFFFn; v3 = rotl64(v3, 21n); v3 ^= v0;
+        v2 = (v2 + v1) & 0xFFFFFFFFFFFFFFFFn; v1 = rotl64(v1, 17n); v1 ^= v2; v2 = rotl64(v2, 32n);
+    };
+
+    const len = msg.length;
+    const paddedLen = len + (8 - (len % 8));
+    const paddedMsg = new Uint8Array(paddedLen);
+    paddedMsg.set(msg);
+    paddedMsg[len] = len & 0xff;
+
+    const view = new DataView(paddedMsg.buffer);
+    for (let i = 0; i < paddedLen; i += 8) {
+        const mi = view.getBigUint64(i, true);
+        v3 ^= mi;
+        sipRound();
+        sipRound();
+        v0 ^= mi;
+    }
+
+    v2 ^= 255n;
+    sipRound();
+    sipRound();
+    sipRound();
+    sipRound();
+
+    return (v0 ^ v1 ^ v2 ^ v3) & 0xFFFFFFFFFFFFFFFFn;
+}
+
 export default class SecureHashMap {
   constructor(capacity = 16) {
     this.capacity = capacity;
-
-    // CRITICAL: Random seed prevents collision attacks
-    this.seed1 = this.cryptoRandomInt();
-    this.seed2 = this.cryptoRandomInt();
-
+    this.seed_k0 = this.cryptoRandomBigInt();
+    this.seed_k1 = this.cryptoRandomBigInt();
     this.buckets = Array(capacity).fill(null).map(() => []);
-
-    // Attack detection thresholds from config
     this.maxChainLength = config.secureHashMap.maxChainLength;
     this.collisionThreshold = config.secureHashMap.collisionThreshold;
     this.collisionCount = 0;
     this.rehashCount = 0;
-
-    // Timing attack mitigation
     this.constantTimeMode = true;
   }
 
-  cryptoRandomInt() {
+  cryptoRandomBigInt() {
     if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const arr = new Uint32Array(1);
-      crypto.getRandomValues(arr);
-      return arr[0];
+        const arr = new BigUint64Array(1);
+        crypto.getRandomValues(arr);
+        return arr[0];
     }
-    throw new Error('Cryptographically secure random not available');
+    throw new Error('Cryptographically secure random BigInt not available');
   }
 
   hash(key) {
-    let h = this.seed1;
-    const str = String(key);
-
-    for (let i = 0; i < str.length; i++) {
-      const c = str.charCodeAt(i);
-      h = this.sipRound(h, c, this.seed2);
-    }
-
-    return Math.abs(h) % this.capacity;
-  }
-
-  sipRound(v, m, k) {
-    v = (v + m) & 0xFFFFFFFF;
-    v = (v ^ k) & 0xFFFFFFFF;
-    v = ((v << 13) | (v >>> 19)) & 0xFFFFFFFF;
-    v = (v + k) & 0xFFFFFFFF;
-    return v;
+    const textEncoder = new TextEncoder();
+    const keyBytes = textEncoder.encode(String(key));
+    const hashValue = siphash24(keyBytes, this.seed_k0, this.seed_k1);
+    return Number(hashValue % BigInt(this.capacity));
   }
 
   set(key, value) {
@@ -66,7 +77,6 @@ export default class SecureHashMap {
     if (bucket.length >= this.maxChainLength) {
       this.collisionCount++;
       logger.warn({ bucketIndex: idx, bucketLength: bucket.length }, 'Potential collision attack detected');
-
       if (this.collisionCount >= this.collisionThreshold) {
         logger.info('Collision threshold exceeded, initiating rehash...');
         this.rehashWithNewSeed();
@@ -106,7 +116,6 @@ export default class SecureHashMap {
   get(key) {
     const idx = this.hash(key);
     const bucket = this.buckets[idx];
-
     if (this.constantTimeMode) {
       let result = undefined;
       for (let i = 0; i < bucket.length; i++) {
@@ -139,14 +148,11 @@ export default class SecureHashMap {
   rehashWithNewSeed() {
     this.rehashCount++;
     logger.info({ rehashCount: this.rehashCount }, 'Rehashing with new random seed');
-
-    this.seed1 = this.cryptoRandomInt();
-    this.seed2 = this.cryptoRandomInt();
-
+    this.seed_k0 = this.cryptoRandomBigInt();
+    this.seed_k1 = this.cryptoRandomBigInt();
     const oldBuckets = this.buckets;
     this.buckets = Array(this.capacity).fill(null).map(() => []);
     this.collisionCount = 0;
-
     for (let bucket of oldBuckets) {
       for (let [key, value] of bucket) {
         const newIdx = this.hash(key);
@@ -175,7 +181,7 @@ export default class SecureHashMap {
       maxChain: Math.max(...chains),
       avgChain: (chains.reduce((a, b) => a + b) / chains.length).toFixed(2),
       collisionEvents: this.collisionCount,
-      rehashes: this.rehashCount
+      rehashes: this.rehashCount,
     };
   }
 }

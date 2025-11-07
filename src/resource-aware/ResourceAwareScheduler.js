@@ -1,6 +1,7 @@
 import { SimulatedCarbonIntensityAPI } from './SimulatedCarbonIntensityAPI.js';
 import { InfeasibleScheduleError } from '../errors.js';
 import { logger } from '../logger.js';
+import { config } from '../config.js';
 
 /**
  * Multi-Objective Task Scheduler
@@ -74,7 +75,7 @@ export default class ResourceAwareScheduler {
 
   optimizeSchedule(candidateTasks) {
     const carbonIntensity = this.carbonIntensityAPI.getCarbonIntensity();
-    const lowCarbonThreshold = 200;
+    const { lowCarbonThreshold } = config.scheduler;
 
     const scored = candidateTasks.map(task => {
       const cost = this.estimateCost(task);

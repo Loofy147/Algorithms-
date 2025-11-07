@@ -5,7 +5,7 @@ describe('AnytimeQuicksort', () => {
     const sorter = new AnytimeQuicksort(100);
     const data = [5, 2, 8, 1, 9, 4];
     const result = sorter.sort(data);
-    expect(result.data).toEqual([1, 2, 4, 5, 8, 9]);
+    expect(result.array).toEqual([1, 2, 4, 5, 8, 9]);
     expect(result.metDeadline).toBe(true);
     expect(result.quality).toBe(1);
   });

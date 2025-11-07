@@ -23,6 +23,11 @@ export const config = {
     ipc: parseFloat(process.env.DVFS_IPC) || 2.0,
   },
 
+  scheduler: {
+    // The carbon intensity (gCO2eq/kWh) below which a job is considered "green".
+    lowCarbonThreshold: parseInt(process.env.LOW_CARBON_THRESHOLD, 10) || 200,
+  },
+
   // --- Adversarial-First Design ---
   secureHashMap: {
     // The maximum number of items in a bucket before it's flagged as a potential collision attack.
