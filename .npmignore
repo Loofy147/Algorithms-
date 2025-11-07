@@ -1,0 +1,14 @@
+# Exclude development and documentation files from the NPM package
+.DS_Store
+.git/
+.github/
+node_modules/
+tests/
+examples/
+docs/
+METHODOLOGY.md
+DEPLOY_TO_HUGGINGFACE.md
+*.log
+.editorconfig
+.nvmrc
+jsdoc.json
