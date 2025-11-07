@@ -25,8 +25,22 @@ export class ComposableOperation {
   }
 }
 
+/**
+ * Composes multiple ComposableOperation instances into a single asynchronous function.
+ * The operations are executed in sequence, with the output of each operation
+ * passed as the input to the next.
+ *
+ * @param {...ComposableOperation} operations - The operations to compose.
+ * @returns {function(any): Promise<any>} A new function that takes an initial input
+ * and returns a promise that resolves with the output of the final operation.
+ */
 export function compose(...operations) {
-    // ... (compose function remains the same, assuming non-async for simplicity)
+  return async function(input) {
+    return operations.reduce(async (acc, op) => {
+      const currentInput = await acc;
+      return op.execute(currentInput);
+    }, Promise.resolve(input));
+  }
 }
 
 export function composeWithTransaction(...operations) {
