@@ -25,9 +25,9 @@ export default class DVFSController {
    *
    * Minimize energy while meeting deadline
    */
-  selectForDeadline(workload, deadline) {
+  selectForDeadline(workload, deadline, IPC = 2.0) {
     const candidates = this.pStates.map((state, idx) => {
-      const time = workload / (state.freq * 1e9);
+      const time = workload / (state.freq * 1e9 * IPC);
       const energy = state.power * time;
 
       return {
@@ -58,9 +58,9 @@ export default class DVFSController {
    *
    * Maximize performance within energy constraint
    */
-  selectForEnergy(workload, energyBudget) {
+  selectForEnergy(workload, energyBudget, IPC = 2.0) {
     const candidates = this.pStates.map((state, idx) => {
-      const time = workload / state.freq;
+      const time = workload / (state.freq * 1e9 * IPC);
       const energy = state.power * time;
 
       return {
