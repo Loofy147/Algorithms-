@@ -9,7 +9,11 @@ describe('Genetic Algorithm', () => {
       new City(1, -1),
     ];
 
-    const ga = new GeneticAlgorithm(50, 4, 0.015, 0.95, cities);
+    const ga = new GeneticAlgorithm(4, cities, {
+      populationSize: 50,
+      mutationRate: 0.015,
+      crossoverRate: 0.95
+    });
 
     let bestDistance = Infinity;
     for (let i = 0; i < 100; i++) {

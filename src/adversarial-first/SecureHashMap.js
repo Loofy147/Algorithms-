@@ -1,3 +1,6 @@
+import { config } from '../config.js';
+import { logger } from '../logger.js';
+
 /**
  * Adversarial-Resistant HashMap
  *
@@ -17,9 +20,9 @@ export default class SecureHashMap {
 
     this.buckets = Array(capacity).fill(null).map(() => []);
 
-    // Attack detection thresholds
-    this.maxChainLength = 8;
-    this.collisionThreshold = 3;
+    // Attack detection thresholds from config
+    this.maxChainLength = config.secureHashMap.maxChainLength;
+    this.collisionThreshold = config.secureHashMap.collisionThreshold;
     this.collisionCount = 0;
     this.rehashCount = 0;
 
@@ -36,11 +39,6 @@ export default class SecureHashMap {
     throw new Error('Cryptographically secure random not available');
   }
 
-  /**
-   * Keyed hash function (SipHash-inspired)
-   *
-   * Prevents adversary from crafting collisions without knowing seed
-   */
   hash(key) {
     let h = this.seed1;
     const str = String(key);
@@ -54,7 +52,6 @@ export default class SecureHashMap {
   }
 
   sipRound(v, m, k) {
-    // Simplified SipHash compression function
     v = (v + m) & 0xFFFFFFFF;
     v = (v ^ k) & 0xFFFFFFFF;
     v = ((v << 13) | (v >>> 19)) & 0xFFFFFFFF;
@@ -62,41 +59,32 @@ export default class SecureHashMap {
     return v;
   }
 
-  /**
-   * Set with attack detection
-   */
   set(key, value) {
     const idx = this.hash(key);
     const bucket = this.buckets[idx];
 
-    // DEFENSE 1: Detect collision attack
     if (bucket.length >= this.maxChainLength) {
       this.collisionCount++;
-      console.warn(`⚠️  Collision attack detected! Bucket ${idx} length: ${bucket.length}`);
+      logger.warn({ bucketIndex: idx, bucketLength: bucket.length }, 'Potential collision attack detected');
 
       if (this.collisionCount >= this.collisionThreshold) {
-        console.log(`🔄 Threshold exceeded, rehashing...`);
+        logger.info('Collision threshold exceeded, initiating rehash...');
         this.rehashWithNewSeed();
-        return this.set(key, value); // Retry with new hash
+        return this.set(key, value);
       }
     }
 
-    // DEFENSE 2: Constant-time search (prevents timing leaks)
     let foundIdx = -1;
     let found = false;
-
     if (this.constantTimeMode) {
-      // Search entire bucket (no early exit)
       for (let i = 0; i < bucket.length; i++) {
         const match = this.constantTimeEquals(bucket[i][0], key);
-        // Branchless assignment
         foundIdx = match ? i : foundIdx;
         found = found || match;
       }
     } else {
-      // Vulnerable version (for comparison)
       for (let i = 0; i < bucket.length; i++) {
-        if (bucket[i][0] === key) { // TIMING LEAK: early exit
+        if (bucket[i][0] === key) {
           found = true;
           foundIdx = i;
           break;
@@ -110,7 +98,6 @@ export default class SecureHashMap {
       bucket.push([key, value]);
     }
 
-    // DEFENSE 3: Proactive expansion
     if (this.loadFactor() > 0.75) {
       this.expand();
     }
@@ -122,54 +109,40 @@ export default class SecureHashMap {
 
     if (this.constantTimeMode) {
       let result = undefined;
-      // Scan entire bucket (constant time)
       for (let i = 0; i < bucket.length; i++) {
         if (this.constantTimeEquals(bucket[i][0], key)) {
           result = bucket[i][1];
         }
-        // Keep scanning (no early exit)
       }
       return result;
     } else {
-      // Vulnerable version
       for (let [k, v] of bucket) {
-        if (k === key) return v; // TIMING LEAK
+        if (k === key) return v;
       }
       return undefined;
     }
   }
 
-  /**
-   * Constant-time equality check
-   *
-   * Critical for password/secret comparison
-   */
   constantTimeEquals(a, b) {
     const strA = String(a);
     const strB = String(b);
-
-    // Always compare maximum length
     const maxLen = Math.max(strA.length, strB.length);
-    let diff = strA.length ^ strB.length; // Length difference
-
+    let diff = strA.length ^ strB.length;
     for (let i = 0; i < maxLen; i++) {
       const charA = i < strA.length ? strA.charCodeAt(i) : 0;
       const charB = i < strB.length ? strB.charCodeAt(i) : 0;
       diff |= charA ^ charB;
     }
-
     return diff === 0;
   }
 
   rehashWithNewSeed() {
     this.rehashCount++;
-    console.log(`🔄 Rehash #${this.rehashCount} with new random seed`);
+    logger.info({ rehashCount: this.rehashCount }, 'Rehashing with new random seed');
 
-    // Generate new cryptographic seeds
     this.seed1 = this.cryptoRandomInt();
     this.seed2 = this.cryptoRandomInt();
 
-    // Rebuild all buckets
     const oldBuckets = this.buckets;
     this.buckets = Array(this.capacity).fill(null).map(() => []);
     this.collisionCount = 0;
@@ -183,7 +156,7 @@ export default class SecureHashMap {
   }
 
   expand() {
-    console.log(`📈 Expanding: ${this.capacity} → ${this.capacity * 2}`);
+    logger.info({ oldCapacity: this.capacity, newCapacity: this.capacity * 2 }, 'Expanding hash map');
     this.capacity *= 2;
     this.rehashWithNewSeed();
   }

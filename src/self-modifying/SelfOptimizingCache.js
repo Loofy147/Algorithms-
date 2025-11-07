@@ -1,3 +1,4 @@
+import { config } from '../config.js';
 import { LRUCache, LFUCache, FIFOCache } from './CachingStrategies.js';
 
 /**
@@ -5,7 +6,7 @@ import { LRUCache, LFUCache, FIFOCache } from './CachingStrategies.js';
  * to dynamically select the best caching strategy.
  */
 export default class SelfOptimizingCache {
-  constructor(capacity, { epsilon = 0.1, evaluationInterval = 100 } = {}) {
+  constructor(capacity = config.cache.capacity, { epsilon = config.cache.epsilon, evaluationInterval = 100 } = {}) {
     this.capacity = capacity;
     this.epsilon = epsilon;
     this.evaluationInterval = evaluationInterval;

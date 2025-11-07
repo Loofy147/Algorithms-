@@ -1,97 +1,96 @@
 import { z } from 'zod';
 import { ComposableOperation, composeWithTransaction } from '../src/algebraic-composability/ComposableOperation.js';
+import { logger } from '../src/logger.js';
+import { TransactionError } from '../src/errors.js';
 
 /**
- * Use Case: Financial Transaction Saga
+ * Use Case: Production-Ready Financial Transaction Saga
  *
- * In a distributed system, performing a multi-step financial transaction (like
- * booking a trip) requires atomicity. If one step fails, all previous steps
- * must be rolled back. This is often implemented using a "Saga" pattern.
+ * This example demonstrates a more realistic, production-ready implementation
+ * of the Saga pattern for a multi-step financial transaction.
  *
- * Algebraic composability allows us to define each step of the transaction
- * as a `ComposableOperation` with a defined schema and a `rollback` function.
- * The `composeWithTransaction` function then acts as the Saga orchestrator,
- * ensuring that the entire operation is either fully completed or fully rolled back.
+ * Key professional practices demonstrated:
+ * 1. Asynchronous Operations: All steps simulate async work (e.g., API calls).
+ * 2. Idempotency: Rollback operations are designed to be idempotent. For example,
+ *    refunding a user checks if the refund has already been applied.
+ * 3. Structured Logging: The saga logs key state transitions for observability.
+ * 4. Custom Error Handling: The main process catches specific `TransactionError`
+ *    types to reliably determine the final state of the system.
  */
-function financialTransactionSaga() {
-  console.log('--- Algebraic Composability Use Case: Financial Transaction Saga ---');
+async function productionSaga() {
+  logger.info('--- Production-Ready Saga Use Case ---');
 
-  // --- Mock Database ---
-  const accounts = { 'user:1': { balance: 1000 }, 'hotel:A': { balance: 5000 } };
-  const bookings = {};
-  console.log('Initial State:', { accounts, bookings });
+  // --- Mock Database & Services ---
+  const accounts = { 'user:1': { balance: 1000, refundedTransactions: new Set() } };
+  const hotelBookings = { 'hotel:A': { confirmed: new Set() } };
+  logger.info({ initialState: { accounts, hotelBookings } }, 'System state initialized');
+
+  // --- Helper for simulating async API calls ---
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
   // --- Operation Definitions ---
 
   const DebitUser = new ComposableOperation(
     'DebitUser',
-    (input) => {
-      accounts[input.userId].balance -= input.amount;
-      return { ...input, debitSuccess: true };
-    },
-    z.object({ userId: z.string(), amount: z.number() }),
-    z.object({ userId: z.string(), amount: z.number(), debitSuccess: z.boolean() }),
-    (output, input) => {
-      console.log(`ROLLBACK: Reverting debit for ${input.userId}`);
-      accounts[input.userId].balance += input.amount;
-    }
-  );
-
-  const CreditHotel = new ComposableOperation(
-    'CreditHotel',
-    (input) => {
-      // Simulate a failure
-      if (input.hotelId === 'hotel:B') {
-        throw new Error('Hotel booking system offline');
+    async (input) => {
+      await delay(50); // Simulate network latency
+      logger.info({ userId: input.userId, amount: input.amount }, 'Processing debit');
+      if (accounts[input.userId].balance < input.amount) {
+        throw new Error('Insufficient funds');
       }
-      accounts[input.hotelId].balance += input.amount;
-      return { ...input, creditSuccess: true };
+      accounts[input.userId].balance -= input.amount;
+      return { ...input, debitTxId: `deb-${Date.now()}` };
     },
-    z.object({ hotelId: z.string(), amount: z.number() }).passthrough(),
-    z.object({ creditSuccess: z.boolean() }).passthrough(),
-    (output, input) => {
-      console.log(`ROLLBACK: Reverting credit for ${input.hotelId}`);
-      accounts[input.hotelId].balance -= input.amount;
+    z.object({ userId: z.string(), amount: z.number().positive(), txId: z.string() }),
+    z.object({ debitTxId: z.string() }).passthrough(),
+    async (output, input) => {
+      // Idempotent Rollback: Only refund if this txId hasn't been refunded before.
+      if (!accounts[input.userId].refundedTransactions.has(input.txId)) {
+        logger.warn({ userId: input.userId, amount: input.amount }, 'Rolling back debit (refunding user)');
+        await delay(50);
+        accounts[input.userId].balance += input.amount;
+        accounts[input.userId].refundedTransactions.add(input.txId);
+      } else {
+        logger.info({ userId: input.userId }, 'Debit rollback already processed, skipping.');
+      }
     }
   );
 
-  const CreateBooking = new ComposableOperation(
-    'CreateBooking',
-    (input) => {
-        bookings[input.bookingId] = { userId: input.userId, hotelId: input.hotelId, status: 'CONFIRMED' };
-        return { ...input, bookingSuccess: true };
+  const BookHotel = new ComposableOperation(
+    'BookHotel',
+    async (input) => {
+      logger.info({ hotelId: input.hotelId, txId: input.txId }, 'Booking hotel');
+      await delay(100);
+      if (input.hotelId === 'hotel:B') {
+        throw new Error('Hotel booking system is offline');
+      }
+      hotelBookings[input.hotelId].confirmed.add(input.txId);
+      return { ...input, bookingConfirmation: `conf-${Date.now()}` };
     },
-    z.object({ bookingId: z.string(), userId: z.string(), hotelId: z.string() }).passthrough(),
-    z.object({ bookingSuccess: z.boolean() }).passthrough(),
-    (output, input) => {
-        console.log(`ROLLBACK: Deleting booking ${input.bookingId}`);
-        delete bookings[input.bookingId];
+    z.object({ hotelId: z.string(), txId: z.string() }).passthrough(),
+    z.object({ bookingConfirmation: z.string() }).passthrough(),
+    async (output, input) => {
+      logger.warn({ hotelId: input.hotelId, txId: input.txId }, 'Rolling back hotel booking (canceling)');
+      await delay(50);
+      hotelBookings[input.hotelId].confirmed.delete(input.txId);
     }
   );
 
-  const tripBookingSaga = composeWithTransaction(DebitUser, CreditHotel, CreateBooking);
+  const tripBookingSaga = composeWithTransaction(DebitUser, BookHotel);
 
-  // --- Scenario 1: Successful Transaction ---
-  console.log('\n--- Running Scenario 1: Successful Booking ---');
+  // --- Scenario: Failed Transaction with Professional Handling ---
+  logger.info('--- Running Scenario: Failed Booking with Rollback ---');
+  const transactionId = `tx-${Date.now()}`;
   try {
-    const successfulInput = { userId: 'user:1', hotelId: 'hotel:A', amount: 200, bookingId: 'booking:xyz' };
-    tripBookingSaga(successfulInput);
-    console.log('Final State (Success):', { accounts, bookings });
+    const failedInput = { userId: 'user:1', hotelId: 'hotel:B', amount: 300, txId: transactionId };
+    await tripBookingSaga(failedInput);
   } catch (e) {
-    console.error('Scenario 1 failed unexpectedly:', e.message);
+    if (e instanceof TransactionError) {
+      logger.fatal({ finalState: { accounts, hotelBookings }, cause: e.cause }, 'Saga failed and rollback failed. Manual intervention required.');
+    } else {
+      logger.info({ finalState: { accounts, hotelBookings } }, 'Saga failed but was successfully rolled back.');
+    }
   }
-
-  // --- Scenario 2: Failed Transaction with Rollback ---
-  console.log('\n--- Running Scenario 2: Failed Booking (hotel offline) ---');
-  try {
-    const failedInput = { userId: 'user:1', hotelId: 'hotel:B', amount: 300, bookingId: 'booking:abc' };
-    tripBookingSaga(failedInput);
-  } catch (e) {
-    console.error('Scenario 2 caught expected error:', e.message);
-    console.log('Final State (After Rollback):', { accounts, bookings });
-  }
-
-  console.log('\nConclusion: The transactional composition ensured that the failed booking was fully rolled back, leaving the system in a consistent state.');
 }
 
-financialTransactionSaga();
+productionSaga();
