@@ -25,7 +25,9 @@ export default class ResourceAwareScheduler {
   estimateCost(task) {
     const ops = task.operations || 1e6;
     const dataSize = task.dataSize || 1e3;
-    const energy = ops * 1e-9; // Joules (1nJ per operation)
+    const baseEnergyPerOp = 50e-12; // 50 pJ
+    const memoryAccessEnergy = (dataSize / 64) * 5e-9; // 5nJ per cache line
+    const energy = (ops * baseEnergyPerOp) + memoryAccessEnergy;
     const carbonIntensity = this.carbonIntensityAPI.getCarbonIntensity(); // gCO2eq/kWh
     const carbon = (energy / 3.6e6) * carbonIntensity; // Convert Joules to kWh, then multiply by intensity
 

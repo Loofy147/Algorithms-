@@ -28,8 +28,12 @@ export default class SecureHashMap {
   }
 
   cryptoRandomInt() {
-    // In production: use crypto.getRandomValues()
-    return Math.floor(Math.random() * 0xFFFFFFFF);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const arr = new Uint32Array(1);
+      crypto.getRandomValues(arr);
+      return arr[0];
+    }
+    throw new Error('Cryptographically secure random not available');
   }
 
   /**

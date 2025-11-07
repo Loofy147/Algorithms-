@@ -64,23 +64,30 @@ export function compose(...operations) {
  */
 export function composeWithTransaction(...operations) {
   return function (input) {
-    const successfulOperations = [];
-    let
-
-currentValue = input;
+    const successfulOps = [];
+    const values = [input];
 
     try {
       for (const op of operations) {
-        currentValue = op.execute(currentValue);
-        successfulOperations.push(op);
+        const result = op.execute(values[values.length - 1]);
+        values.push(result);
+        successfulOps.push(op);
       }
-      return currentValue;
+      return values[values.length - 1];
     } catch (error) {
-      for (let i = successfulOperations.length - 1; i >= 0; i--) {
-        const op = successfulOperations[i];
-        if (op.rollback) {
-          op.rollback();
+      const rollbackErrors = [];
+      for (let i = successfulOps.length - 1; i >= 0; i--) {
+        try {
+          if (successfulOps[i].rollback) {
+            successfulOps[i].rollback(values[i + 1], values[i]);
+          }
+        } catch (rbError) {
+          rollbackErrors.push({ op: successfulOps[i].name, error: rbError });
         }
+      }
+
+      if (rollbackErrors.length > 0) {
+        throw new Error('Transaction failed and rollback had errors', { cause: { originalError: error, rollbackErrors } });
       }
       throw error;
     }
