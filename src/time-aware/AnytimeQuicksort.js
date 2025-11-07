@@ -63,11 +63,15 @@ export default class AnytimeQuicksort {
   measureQuality(arr) {
     if (arr.length < 2) return 1.0;
     let inversions = 0;
-    for (let i = 0; i < arr.length - 1; i++) {
-      if (arr[i] > arr[i + 1]) {
-        inversions++;
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = i + 1; j < arr.length; j++) {
+        if (arr[i] > arr[j]) {
+          inversions++;
+        }
       }
     }
-    return 1.0 - (inversions / (arr.length - 1));
+    const maxInversions = arr.length * (arr.length - 1) / 2;
+    if (maxInversions === 0) return 1.0;
+    return 1.0 - (inversions / maxInversions);
   }
 }
