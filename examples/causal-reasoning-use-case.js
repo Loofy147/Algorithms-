@@ -53,7 +53,7 @@ function abTestingAnalysis() {
 
   console.log(`\nIs there a paradox? ${results.paradox}`);
 
-  console.log('\nConclusion: The overall data suggests Design B is better. However, when we control for');
+  console.log('\nConclusion: The overall data suggests Design B is worse (negative trend). However, when we control for');
   console.log('the confounding variable (browser type), we see that Design A is actually better within');
   console.log('each segment. The overall result was skewed because Design B was disproportionately');
   console.log('shown to users with Modern browsers.');
