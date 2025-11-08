@@ -17,4 +17,13 @@ describe('AnytimeQuicksort', () => {
     expect(result.metDeadline).toBe(false);
     expect(result.quality).toBeLessThan(1);
   });
+
+  it('should correctly measure the quality of a partially sorted array', () => {
+    const sorter = new AnytimeQuicksort(100);
+    const partiallySorted = [5, 1, 2, 3, 4]; // 4 inversions: (5,1), (5,2), (5,3), (5,4)
+    const quality = sorter.measureQuality(partiallySorted);
+    const maxInversions = partiallySorted.length * (partiallySorted.length - 1) / 2; // 10
+    const expectedQuality = 1.0 - (4 / maxInversions);
+    expect(quality).toBe(expectedQuality);
+  });
 });

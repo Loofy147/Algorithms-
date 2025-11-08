@@ -26,24 +26,22 @@ describe('Algebraic Composability with Zod', () => {
     numberSchema
   );
 
-  it('should compose two compatible operations', () => {
+  it('should compose two compatible operations', async () => {
     const addOneAndToString = compose(addOne, numberToString);
-    expect(addOneAndToString(1)).toBe('2');
+    await expect(addOneAndToString(1)).resolves.toBe('2');
   });
 
-  it('should compose multiple compatible operations', () => {
+  it('should compose multiple compatible operations', async () => {
     const pipeline = compose(addOne, numberToString, stringToLength);
-    expect(pipeline(1)).toBe(1);
+    await expect(pipeline(1)).resolves.toBe(1);
   });
 
-  it('should throw an error for invalid input to the pipeline', () => {
+  it('should throw an error for invalid input to the pipeline', async () => {
     const pipeline = compose(addOne, numberToString);
-    expect(() => {
-      pipeline('not a number');
-    }).toThrow();
+    await expect(pipeline('not a number')).rejects.toThrow();
   });
 
-  it('should throw an error for an operation with invalid output', () => {
+  it('should throw an error for an operation with invalid output', async () => {
     const invalidOperation = new ComposableOperation(
       'invalid',
       () => 'not a number',
@@ -51,12 +49,10 @@ describe('Algebraic Composability with Zod', () => {
       numberSchema
     );
     const pipeline = compose(addOne, invalidOperation);
-    expect(() => {
-      pipeline(1);
-    }).toThrow();
+    await expect(pipeline(1)).rejects.toThrow();
   });
 
-  it('should throw a runtime error when executing with incompatible schemas', () => {
+  it('should throw a runtime error when executing with incompatible schemas', async () => {
     const stringOp = new ComposableOperation(
       'stringOp',
       (s) => s.length,
@@ -74,8 +70,6 @@ describe('Algebraic Composability with Zod', () => {
     const pipeline = compose(numberOp, stringOp);
 
     // The error should be thrown at runtime when the data is passed.
-    expect(() => {
-      pipeline(1);
-    }).toThrow(); // Zod will throw ZodError during parsing
+    await expect(pipeline(1)).rejects.toThrow(); // Zod will throw ZodError during parsing
   });
 });
