@@ -45,4 +45,18 @@ describe('SelfOptimizingCache', () => {
     expect(cache.get('b')).toBe(2);
     expect(cache.get('c')).toBe(null);
   });
+
+  it('LFU should handle tie-breaking correctly by evicting the least recently used', () => {
+    const lfuCache = new SelfOptimizingCache(2).strategies.LFU;
+    lfuCache.put('a', 1); // a: freq 1
+    lfuCache.put('b', 2); // b: freq 1
+
+    lfuCache.get('a'); // a: freq 2
+    lfuCache.get('b'); // b: freq 2
+
+    lfuCache.put('c', 3); // a and b have same freq, evict a (LRU)
+    expect(lfuCache.get('a')).toBeNull();
+    expect(lfuCache.get('b')).toBe(2);
+    expect(lfuCache.get('c')).toBe(3);
+  });
 });

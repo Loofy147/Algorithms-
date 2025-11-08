@@ -108,13 +108,11 @@ export class LFUCache extends BaseCache {
         }
       }
 
-      // Tie-breaking: Evict the least recently used (first in insertion order)
-      for (const key of this.cache.keys()) {
-        if (keysToDelete.includes(key)) {
-          this.cache.delete(key);
-          this.freq.delete(key);
-          break;
-        }
+      // Tie-breaking: Evict the least recently used among the least frequent items.
+      const lruKey = [...this.cache.keys()].find(key => keysToDelete.includes(key));
+      if (lruKey) {
+        this.cache.delete(lruKey);
+        this.freq.delete(lruKey);
       }
     }
 
