@@ -57,4 +57,12 @@ export const config = {
     // L2 regularization strength to prevent overfitting.
     regularization: parseFloat(process.env.LR_REGULARIZATION) || 0.01,
   },
+
+  // --- Resilience ---
+  circuitBreaker: {
+    // The number of failures required to trip the circuit breaker.
+    failureThreshold: parseInt(process.env.CB_FAILURE_THRESHOLD, 10) || 5,
+    // The time in milliseconds to wait before transitioning to HALF_OPEN state.
+    resetTimeout: parseInt(process.env.CB_RESET_TIMEOUT, 10) || 30000,
+  },
 };
