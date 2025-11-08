@@ -18,4 +18,12 @@ describe('SecureHashMap', () => {
     }
     expect(map.rehashCount).toBeGreaterThan(0);
   });
+
+  it('should delete values correctly', () => {
+    const map = new SecureHashMap();
+    map.set('key1', 'value1');
+    expect(map.delete('key1')).toBe(true);
+    expect(map.get('key1')).toBeUndefined();
+    expect(map.delete('key1')).toBe(false);
+  });
 });

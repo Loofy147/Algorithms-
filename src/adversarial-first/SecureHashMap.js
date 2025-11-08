@@ -1,5 +1,6 @@
 import { config } from '../config.js';
 import { logger } from '../logger.js';
+import crypto from 'crypto';
 
 // Helper for 64-bit BigInt rotation.
 const rotl64 = (x, b) => (x << b) | (x >> (64n - b));
@@ -55,12 +56,9 @@ export default class SecureHashMap {
   }
 
   cryptoRandomBigInt() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-        const arr = new BigUint64Array(1);
-        crypto.getRandomValues(arr);
-        return arr[0];
-    }
-    throw new Error('Cryptographically secure random BigInt not available');
+    // Node.js crypto module for CSPRNG
+    const buf = crypto.randomBytes(8);
+    return buf.readBigUInt64LE(0);
   }
 
   hash(key) {
@@ -130,6 +128,31 @@ export default class SecureHashMap {
       }
       return undefined;
     }
+  }
+
+  delete(key) {
+    const idx = this.hash(key);
+    const bucket = this.buckets[idx];
+    let foundIdx = -1;
+
+    for (let i = 0; i < bucket.length; i++) {
+      if (this.constantTimeMode) {
+        if (this.constantTimeEquals(bucket[i][0], key)) {
+          foundIdx = i;
+        }
+      } else {
+        if (bucket[i][0] === key) {
+          foundIdx = i;
+          break;
+        }
+      }
+    }
+
+    if (foundIdx !== -1) {
+      bucket.splice(foundIdx, 1);
+      return true;
+    }
+    return false;
   }
 
   constantTimeEquals(a, b) {
