@@ -13,8 +13,8 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-# The application is a collection of scripts, not a server.
-# This default command starts an interactive shell within the container.
-# From there, you can execute the individual use case examples.
-# Example: node examples/time-aware-use-case.js
-CMD [ "bash" ]
+# Expose the port the app runs on
+EXPOSE 3000
+
+# Start the SecureHashMap service
+CMD [ "node", "src/services/secureHashMapService.js" ]
