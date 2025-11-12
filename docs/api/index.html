@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <title>Home - Documentation</title>
+
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+
+
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AppError.html">AppError</a></li><li><a href="BaseCache.html">BaseCache</a></li><li><a href="CausalAnalyzer.html">CausalAnalyzer</a><ul class='methods'><li data-type='method'><a href="CausalAnalyzer.html#analyze">analyze</a></li></ul></li><li><a href="CircuitBreaker.html">CircuitBreaker</a><ul class='methods'><li data-type='method'><a href="CircuitBreaker.html#execute">execute</a></li></ul></li><li><a href="DifferentiallyPrivateQuery.html">DifferentiallyPrivateQuery</a><ul class='methods'><li data-type='method'><a href="DifferentiallyPrivateQuery.html#execute">execute</a></li></ul></li><li><a href="FIFOCache.html">FIFOCache</a></li><li><a href="InfeasibleScheduleError.html">InfeasibleScheduleError</a></li><li><a href="LFUCache.html">LFUCache</a></li><li><a href="LRUCache.html">LRUCache</a></li><li><a href="ProbabilisticCounter.html">ProbabilisticCounter</a><ul class='methods'><li data-type='method'><a href="ProbabilisticCounter.html#getAgrestiCoullInterval">getAgrestiCoullInterval</a></li><li data-type='method'><a href="ProbabilisticCounter.html#getConfidenceInterval">getConfidenceInterval</a></li><li data-type='method'><a href="ProbabilisticCounter.html#getCounts">getCounts</a></li><li data-type='method'><a href="ProbabilisticCounter.html#getEstimate">getEstimate</a></li><li data-type='method'><a href="ProbabilisticCounter.html#getWilsonInterval">getWilsonInterval</a></li><li data-type='method'><a href="ProbabilisticCounter.html#increment">increment</a></li></ul></li><li><a href="PropensityScoreMatcher.html">PropensityScoreMatcher</a><ul class='methods'><li data-type='method'><a href="PropensityScoreMatcher.html#fit">fit</a></li><li data-type='method'><a href="PropensityScoreMatcher.html#match">match</a></li></ul></li><li><a href="SimulatedCarbonIntensityAPI.html">SimulatedCarbonIntensityAPI</a><ul class='methods'><li data-type='method'><a href="SimulatedCarbonIntensityAPI.html#getCarbonIntensity">getCarbonIntensity</a></li></ul></li><li><a href="TransactionError.html">TransactionError</a></li><li><a href="ValidationError.html">ValidationError</a></li><li><a href="module.exports.html">exports</a></li><li></li><li></li><li></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-adversarial_first_design.html">adversarial_first_design</a></li><li><a href="tutorial-algebraic_composability.html">algebraic_composability</a></li><li><a href="tutorial-carbon_aware_computing.html">carbon_aware_computing</a></li><li><a href="tutorial-causal_reasoning.html">causal_reasoning</a></li><li><a href="tutorial-differential_privacy.html">differential_privacy</a></li><li><a href="tutorial-genetic_algorithms.html">genetic_algorithms</a></li><li><a href="tutorial-propensity_score_matching.html">propensity_score_matching</a></li><li><a href="tutorial-resource_aware_computing.html">resource_aware_computing</a></li><li><a href="tutorial-self_modifying_algorithms.html">self_modifying_algorithms</a></li><li><a href="tutorial-time_aware_computing.html">time_aware_computing</a></li><li><a href="tutorial-transactional_composability.html">transactional_composability</a></li><li><a href="tutorial-uncertainty_quantification.html">uncertainty_quantification</a></li></ul><h3>Global</h3><ul><li><a href="global.html#adapt">adapt</a></li><li><a href="global.html#compose">compose</a></li><li><a href="global.html#fitGumbel">fitGumbel</a></li><li><a href="global.html#getCurrentState">getCurrentState</a></li><li><a href="global.html#logger">logger</a></li><li><a href="global.html#measure">measure</a></li><li><a href="global.html#selectForDeadline">selectForDeadline</a></li><li><a href="global.html#selectForEnergy">selectForEnergy</a></li></ul>
+
+</nav>
+
+<div id="main">
+
+
+
+
+
+
+
+
+
+    <section class="package">
+        <h3> </h3>
+    </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <section class="readme usertext">
+        <article><h1>Advanced Computational Principles: A Production-Ready Toolkit</h1>
+<p>This project provides production-ready JavaScript implementations of seven advanced computational principles. These concepts, often confined to academic papers, are essential for building robust, efficient, and secure real-world systems. This toolkit is designed not just for learning, but as a reliable foundation for production use.</p>
+<p>Our development is guided by a strict <strong><a href="./METHODOLOGY.md">Professional Working Methodology</a></strong>, emphasizing a research-implement-verify workflow to ensure the highest quality.</p>
+<h2>Principles Implemented</h2>
+<p>Each principle is implemented as a self-contained, professional-grade module. For detailed documentation on the theory and research behind each, please see the <code>docs/</code> directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Principle</th>
+<th style="text-align:left">Key Implementation</th>
+<th style="text-align:left">Description</th>
+<th style="text-align:left">Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Time-Aware Computing</strong></td>
+<td style="text-align:left"><code>AnytimeQuicksort</code></td>
+<td style="text-align:left">An algorithm that provides the best possible result within a strict time budget.</td>
+<td style="text-align:left"><strong><a href="./examples/time-aware-use-case.js">Real-time UI</a></strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Resource-Aware Computing</strong></td>
+<td style="text-align:left"><code>ResourceAwareScheduler</code></td>
+<td style="text-align:left">A multi-objective scheduler that optimizes for CPU, energy, and carbon.</td>
+<td style="text-align:left"><strong><a href="./examples/resource-aware-use-case.js">Cloud Cost Management</a></strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Adversarial-First Design</strong></td>
+<td style="text-align:left"><code>SecureHashMap</code></td>
+<td style="text-align:left">A hash map resistant to collision-based denial-of-service attacks.</td>
+<td style="text-align:left"><strong><a href="./examples/adversarial-first-use-case.js">Secure Caching Server</a></strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Algebraic Composability</strong></td>
+<td style="text-align:left"><code>composeWithTransaction</code></td>
+<td style="text-align:left">A Saga-pattern orchestrator for building resilient, multi-step transactions.</td>
+<td style="text-align:left"><strong><a href="./examples/algebraic-composability-use-case.js">Financial Transaction</a></strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Causal Reasoning</strong></td>
+<td style="text-align:left"><code>CausalAnalyzer</code></td>
+<td style="text-align:left">A tool for identifying Simpson's Paradox and confounding variables.</td>
+<td style="text-align:left"><strong><a href="./examples/causal-reasoning-use-case.js">A/B Test Analysis</a></strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Self-Modifying Algorithms</strong></td>
+<td style="text-align:left"><code>SelfOptimizingCache</code></td>
+<td style="text-align:left">A cache that uses a multi-armed bandit to dynamically select the best strategy.</td>
+<td style="text-align:left"><strong><a href="./examples/self-modifying-use-case.js">Adaptive CDN</a></strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Uncertainty Quantification</strong></td>
+<td style="text-align:left"><code>ProbabilisticCounter</code></td>
+<td style="text-align:left">A counter that provides statistically sound confidence intervals (Wilson, Agresti-Coull).</td>
+<td style="text-align:left"><strong><a href="./examples/uncertainty-quantification-use-case.js">Real-time Polling</a></strong></td>
+</tr>
+</tbody>
+</table>
+<h2>Production-Ready Features</h2>
+<p>This is more than a reference implementation. It's a professional toolkit built with:</p>
+<ul>
+<li><strong>Centralized Configuration</strong>: All algorithmic parameters are managed in <code>src/config.js</code> and can be overridden with environment variables.</li>
+<li><strong>Structured Logging</strong>: The entire system uses <code>pino</code> for structured, leveled logging, essential for production observability.</li>
+<li><strong>Custom Error Handling</strong>: Specific, custom error types (e.g., <code>TransactionError</code>) allow for robust and predictable error handling.</li>
+<li><strong>Comprehensive Testing</strong>: The project is validated with unit, integration, and performance tests.</li>
+</ul>
+<h2>Getting Started</h2>
+<h3>Prerequisites</h3>
+<ul>
+<li>Node.js &gt;= 18.0</li>
+<li>npm</li>
+</ul>
+<h3>Installation</h3>
+<pre class="prettyprint source lang-bash"><code>npm install
+</code></pre>
+<h3>Running the Use Cases</h3>
+<p>The <code>examples/</code> directory contains a runnable, real-world use case for each principle.</p>
+<pre class="prettyprint source lang-bash"><code># Example: Run the Causal Reasoning use case
+node examples/causal-reasoning-use-case.js
+</code></pre>
+<h3>Running Tests</h3>
+<p>The project has a full test suite.</p>
+<pre class="prettyprint source lang-bash"><code># Run all tests
+npm test
+
+# Run a specific test file
+npm test -- tests/time-aware/AnytimeQuicksort.test.js
+</code></pre>
+<h3>API Documentation</h3>
+<p>This project uses JSDoc for all public APIs. You can generate a full API documentation website by running:</p>
+<pre class="prettyprint source lang-bash"><code>npm run docs:generate
+</code></pre>
+<p>This will create a <code>docs/api</code> directory with a searchable, navigable website detailing all classes and methods.</p>
+<h3>Deployment</h3>
+<p>This project can be deployed as a containerized application. For detailed instructions on deploying to a cloud environment, see the <strong><a href="./DEPLOY_TO_HUGGINGFACE.md">Hugging Face Deployment Guide</a></strong>.</p></article>
+    </section>
+
+
+
+
+
+
+
+
+
+<section>
+
+<header>
+
+        <h2>
+
+            adversarial-first/DifferentiallyPrivateQuery.js
+
+        </h2>
+
+
+</header>
+
+<article>
+
+        <div class="container-overview">
+
+
+
+<dl class="details">
+
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>An implementation of a differentially private query wrapper.</p></li></ul></dd>
+
+
+
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="adversarial-first_DifferentiallyPrivateQuery.js.html">adversarial-first/DifferentiallyPrivateQuery.js</a>, <a href="adversarial-first_DifferentiallyPrivateQuery.js.html#line1">line 1</a>
+    </li></ul></dd>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+                <div class="description usertext"><p>An implementation of a differentially private query wrapper.</p></div>
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+
+        <h2>
+
+            resource-aware/SimulatedCarbonIntensityAPI.js
+
+        </h2>
+
+
+</header>
+
+<article>
+
+        <div class="container-overview">
+
+
+
+<dl class="details">
+
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>A simulated carbon intensity API that provides a time-series of carbon intensity data.</p></li></ul></dd>
+
+
+
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="resource-aware_SimulatedCarbonIntensityAPI.js.html">resource-aware/SimulatedCarbonIntensityAPI.js</a>, <a href="resource-aware_SimulatedCarbonIntensityAPI.js.html#line1">line 1</a>
+    </li></ul></dd>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+                <div class="description usertext"><p>A simulated carbon intensity API that provides a time-series of carbon intensity data.</p></div>
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+</section>
+
+
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Wed Nov 12 2025 14:13:12 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>
