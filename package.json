@@ -7,6 +7,8 @@
     "test": "tests"
   },
   "scripts": {
+    "start:hashmap": "node src/services/secureHashMapService.js",
+    "start:scheduler": "node src/services/resourceAwareSchedulerService.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "docs:generate": "jsdoc -c jsdoc.json"
   },

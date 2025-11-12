@@ -27,12 +27,24 @@ This is more than a reference implementation. It's a professional toolkit built 
 - **Custom Error Handling**: Specific, custom error types (e.g., `TransactionError`) allow for robust and predictable error handling.
 - **Comprehensive Testing**: The project is validated with unit, integration, and performance tests.
 
+## Microservices Architecture
+
+This project is evolving into a microservices-based system. Each of the core computational principles is being refactored into a standalone, deployable service with a RESTful API.
+
+### Available Services
+
+| Service | Description | Port | Start Command |
+| :--- | :--- | :--- | :--- |
+| **SecureHashMap** | A remote, secure caching service. | `3000` | `npm run start:hashmap` |
+| **ResourceAwareScheduler** | An API for optimizing task schedules based on resource constraints. | `3001` | `npm run start:scheduler` |
+
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js >= 18.0
 - npm
+- Docker (optional, for containerized deployment)
 
 ### Installation
 
@@ -40,13 +52,16 @@ This is more than a reference implementation. It's a professional toolkit built 
 npm install
 ```
 
-### Running the Use Cases
+### Running the Services
 
-The `examples/` directory contains a runnable, real-world use case for each principle.
+You can run any of the available services using the `npm run` command:
 
 ```bash
-# Example: Run the Causal Reasoning use case
-node examples/causal-reasoning-use-case.js
+# Start the SecureHashMap service
+npm run start:hashmap
+
+# In a separate terminal, start the ResourceAwareScheduler service
+npm run start:scheduler
 ```
 
 ### Running Tests
