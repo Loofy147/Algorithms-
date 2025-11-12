@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <title>Tutorial: genetic_algorithms - Documentation</title>
+
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+
+
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AppError.html">AppError</a></li><li><a href="BaseCache.html">BaseCache</a></li><li><a href="CausalAnalyzer.html">CausalAnalyzer</a><ul class='methods'><li data-type='method'><a href="CausalAnalyzer.html#analyze">analyze</a></li></ul></li><li><a href="CircuitBreaker.html">CircuitBreaker</a><ul class='methods'><li data-type='method'><a href="CircuitBreaker.html#execute">execute</a></li></ul></li><li><a href="DifferentiallyPrivateQuery.html">DifferentiallyPrivateQuery</a><ul class='methods'><li data-type='method'><a href="DifferentiallyPrivateQuery.html#execute">execute</a></li></ul></li><li><a href="FIFOCache.html">FIFOCache</a></li><li><a href="InfeasibleScheduleError.html">InfeasibleScheduleError</a></li><li><a href="LFUCache.html">LFUCache</a></li><li><a href="LRUCache.html">LRUCache</a></li><li><a href="ProbabilisticCounter.html">ProbabilisticCounter</a><ul class='methods'><li data-type='method'><a href="ProbabilisticCounter.html#getAgrestiCoullInterval">getAgrestiCoullInterval</a></li><li data-type='method'><a href="ProbabilisticCounter.html#getConfidenceInterval">getConfidenceInterval</a></li><li data-type='method'><a href="ProbabilisticCounter.html#getCounts">getCounts</a></li><li data-type='method'><a href="ProbabilisticCounter.html#getEstimate">getEstimate</a></li><li data-type='method'><a href="ProbabilisticCounter.html#getWilsonInterval">getWilsonInterval</a></li><li data-type='method'><a href="ProbabilisticCounter.html#increment">increment</a></li></ul></li><li><a href="PropensityScoreMatcher.html">PropensityScoreMatcher</a><ul class='methods'><li data-type='method'><a href="PropensityScoreMatcher.html#fit">fit</a></li><li data-type='method'><a href="PropensityScoreMatcher.html#match">match</a></li></ul></li><li><a href="SimulatedCarbonIntensityAPI.html">SimulatedCarbonIntensityAPI</a><ul class='methods'><li data-type='method'><a href="SimulatedCarbonIntensityAPI.html#getCarbonIntensity">getCarbonIntensity</a></li></ul></li><li><a href="TransactionError.html">TransactionError</a></li><li><a href="ValidationError.html">ValidationError</a></li><li><a href="module.exports.html">exports</a></li><li></li><li></li><li></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-adversarial_first_design.html">adversarial_first_design</a></li><li><a href="tutorial-algebraic_composability.html">algebraic_composability</a></li><li><a href="tutorial-carbon_aware_computing.html">carbon_aware_computing</a></li><li><a href="tutorial-causal_reasoning.html">causal_reasoning</a></li><li><a href="tutorial-differential_privacy.html">differential_privacy</a></li><li><a href="tutorial-genetic_algorithms.html">genetic_algorithms</a></li><li><a href="tutorial-propensity_score_matching.html">propensity_score_matching</a></li><li><a href="tutorial-resource_aware_computing.html">resource_aware_computing</a></li><li><a href="tutorial-self_modifying_algorithms.html">self_modifying_algorithms</a></li><li><a href="tutorial-time_aware_computing.html">time_aware_computing</a></li><li><a href="tutorial-transactional_composability.html">transactional_composability</a></li><li><a href="tutorial-uncertainty_quantification.html">uncertainty_quantification</a></li></ul><h3>Global</h3><ul><li><a href="global.html#adapt">adapt</a></li><li><a href="global.html#compose">compose</a></li><li><a href="global.html#fitGumbel">fitGumbel</a></li><li><a href="global.html#getCurrentState">getCurrentState</a></li><li><a href="global.html#logger">logger</a></li><li><a href="global.html#measure">measure</a></li><li><a href="global.html#selectForDeadline">selectForDeadline</a></li><li><a href="global.html#selectForEnergy">selectForEnergy</a></li></ul>
+
+</nav>
+
+<div id="main">
+
+    <h1 class="page-title">Tutorial: genetic_algorithms</h1>
+
+
+    <section>
+
+<header>
+
+
+    <h2>genetic_algorithms</h2>
+</header>
+
+<article>
+    <h1>Genetic Algorithms</h1>
+<h2>Theoretical Background</h2>
+<p>Genetic Algorithms are a class of optimization algorithms inspired by the process of natural selection. They are a subset of the larger field of Evolutionary Computation, and they are particularly well-suited for solving complex optimization problems where traditional methods may fail.</p>
+<p>The core concepts of Genetic Algorithms include:</p>
+<ul>
+<li><strong>Population</strong>: A set of candidate solutions to the problem.</li>
+<li><strong>Chromosome</strong>: A representation of a single candidate solution.</li>
+<li><strong>Fitness Function</strong>: a function that evaluates how good a particular solution is.</li>
+<li><strong>Selection</strong>: The process of choosing which solutions from the current population will be used to create the next generation.</li>
+<li><strong>Crossover</strong>: The process of combining two parent solutions to create a new offspring solution.</li>
+<li><strong>Mutation</strong>: The process of randomly changing a solution to introduce new genetic material into the population.</li>
+</ul>
+<h2>Key Research</h2>
+<ul>
+<li><strong>A Genetic Algorithm Tutorial - Johns Hopkins Computer Science</strong>: <a href="https://www.cs.jhu.edu/~ayuille/courses/Stat202C-Spring10/ga_tutorial.pdf">https://www.cs.jhu.edu/~ayuille/courses/Stat202C-Spring10/ga_tutorial.pdf</a></li>
+<li><strong>An introduction to genetic algorithms - Max Halford</strong>: <a href="https://maxhalford.github.io/blog/genetic-algorithms-introduction/">https://maxhalford.github.io/blog/genetic-algorithms-introduction/</a></li>
+<li><strong>Genetic Algorithms - GeeksforGeeks</strong>: <a href="https://www.geeksforgeeks.org/dsa/genetic-algorithms/">https://www.geeksforgeeks.org/dsa/genetic-algorithms/</a></li>
+</ul>
+<h2>Implementation Details</h2>
+<p>This project will expand the <code>self-modifying</code> principle by implementing a genetic algorithm to solve the traveling salesman problem. This will involve:</p>
+<ul>
+<li><strong><code>Population</code></strong>: A class to manage a population of candidate solutions.</li>
+<li><strong><code>Chromosome</code></strong>: A class to represent a single tour in the traveling salesman problem.</li>
+<li><strong><code>GeneticAlgorithm</code></strong>: A class that will orchestrate the process of selection, crossover, and mutation to evolve a population of solutions over time.</li>
+</ul>
+</article>
+
+</section>
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Wed Nov 12 2025 14:13:12 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

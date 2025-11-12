@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <title>Tutorial: resource_aware_computing - Documentation</title>
+
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+
+
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AppError.html">AppError</a></li><li><a href="BaseCache.html">BaseCache</a></li><li><a href="CausalAnalyzer.html">CausalAnalyzer</a><ul class='methods'><li data-type='method'><a href="CausalAnalyzer.html#analyze">analyze</a></li></ul></li><li><a href="CircuitBreaker.html">CircuitBreaker</a><ul class='methods'><li data-type='method'><a href="CircuitBreaker.html#execute">execute</a></li></ul></li><li><a href="DifferentiallyPrivateQuery.html">DifferentiallyPrivateQuery</a><ul class='methods'><li data-type='method'><a href="DifferentiallyPrivateQuery.html#execute">execute</a></li></ul></li><li><a href="FIFOCache.html">FIFOCache</a></li><li><a href="InfeasibleScheduleError.html">InfeasibleScheduleError</a></li><li><a href="LFUCache.html">LFUCache</a></li><li><a href="LRUCache.html">LRUCache</a></li><li><a href="ProbabilisticCounter.html">ProbabilisticCounter</a><ul class='methods'><li data-type='method'><a href="ProbabilisticCounter.html#getAgrestiCoullInterval">getAgrestiCoullInterval</a></li><li data-type='method'><a href="ProbabilisticCounter.html#getConfidenceInterval">getConfidenceInterval</a></li><li data-type='method'><a href="ProbabilisticCounter.html#getCounts">getCounts</a></li><li data-type='method'><a href="ProbabilisticCounter.html#getEstimate">getEstimate</a></li><li data-type='method'><a href="ProbabilisticCounter.html#getWilsonInterval">getWilsonInterval</a></li><li data-type='method'><a href="ProbabilisticCounter.html#increment">increment</a></li></ul></li><li><a href="PropensityScoreMatcher.html">PropensityScoreMatcher</a><ul class='methods'><li data-type='method'><a href="PropensityScoreMatcher.html#fit">fit</a></li><li data-type='method'><a href="PropensityScoreMatcher.html#match">match</a></li></ul></li><li><a href="SimulatedCarbonIntensityAPI.html">SimulatedCarbonIntensityAPI</a><ul class='methods'><li data-type='method'><a href="SimulatedCarbonIntensityAPI.html#getCarbonIntensity">getCarbonIntensity</a></li></ul></li><li><a href="TransactionError.html">TransactionError</a></li><li><a href="ValidationError.html">ValidationError</a></li><li><a href="module.exports.html">exports</a></li><li></li><li></li><li></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-adversarial_first_design.html">adversarial_first_design</a></li><li><a href="tutorial-algebraic_composability.html">algebraic_composability</a></li><li><a href="tutorial-carbon_aware_computing.html">carbon_aware_computing</a></li><li><a href="tutorial-causal_reasoning.html">causal_reasoning</a></li><li><a href="tutorial-differential_privacy.html">differential_privacy</a></li><li><a href="tutorial-genetic_algorithms.html">genetic_algorithms</a></li><li><a href="tutorial-propensity_score_matching.html">propensity_score_matching</a></li><li><a href="tutorial-resource_aware_computing.html">resource_aware_computing</a></li><li><a href="tutorial-self_modifying_algorithms.html">self_modifying_algorithms</a></li><li><a href="tutorial-time_aware_computing.html">time_aware_computing</a></li><li><a href="tutorial-transactional_composability.html">transactional_composability</a></li><li><a href="tutorial-uncertainty_quantification.html">uncertainty_quantification</a></li></ul><h3>Global</h3><ul><li><a href="global.html#adapt">adapt</a></li><li><a href="global.html#compose">compose</a></li><li><a href="global.html#fitGumbel">fitGumbel</a></li><li><a href="global.html#getCurrentState">getCurrentState</a></li><li><a href="global.html#logger">logger</a></li><li><a href="global.html#measure">measure</a></li><li><a href="global.html#selectForDeadline">selectForDeadline</a></li><li><a href="global.html#selectForEnergy">selectForEnergy</a></li></ul>
+
+</nav>
+
+<div id="main">
+
+    <h1 class="page-title">Tutorial: resource_aware_computing</h1>
+
+
+    <section>
+
+<header>
+
+
+    <h2>resource_aware_computing</h2>
+</header>
+
+<article>
+    <h1>Resource-Aware Computing</h1>
+<h2>Theoretical Background</h2>
+<p>Resource-Aware Computing is a computational model that considers not just time, but also a wide range of other resources, such as energy, memory, and network bandwidth. The goal is to optimize for a combination of these resources, rather than just one. This is a form of multi-objective optimization, where the aim is to find a set of solutions that represent the best possible trade-offs between the different objectives.</p>
+<p>A key concept in this area is <strong>Pareto optimality</strong>. A solution is Pareto optimal if it is impossible to improve one objective without making at least one other objective worse. The set of all Pareto optimal solutions is known as the Pareto frontier.</p>
+<h2>Key Research</h2>
+<ul>
+<li><strong>Multi-objective production scheduling optimization strategy based on fuzzy mathematics theory</strong>: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12244544/">https://pmc.ncbi.nlm.nih.gov/articles/PMC12244544/</a></li>
+<li><strong>Multi-Objective Optimization Techniques in Cloud Task Scheduling: A Systematic Literature Review</strong>: <a href="https://www.researchgate.net/publication/388062201_Multi-Objective_Optimization_Techniques_in_Cloud_Task_Scheduling_A_Systematic_Literature_Review">https://www.researchgate.net/publication/388062201_Multi-Objective_Optimization_Techniques_in_Cloud_Task_Scheduling_A_Systematic_Literature_Review</a></li>
+<li><strong>MULTI-OBJECTIVE OPTIMIZATION IN PROJECT SCHEDULING: BALANCING TIME, COST, AND QUALITY</strong>: <a href="https://www.researchgate.net/publication/390212770_MULTI-OBJECTIVE_OPTIMIZATION_IN_PROJECT_SCHEDULING_BALANCING_TIME_COST_AND_QUALITY_IN_MULTI-FAMILY_CONSTRUCTION_Present_methodologies_that_optimize_project_schedules_while_considering_trade-offs_betwe">https://www.researchgate.net/publication/390212770_MULTI-OBJECTIVE_OPTIMIZATION_IN_PROJECT_SCHEDULING_BALANCING_TIME_COST_AND_QUALITY_IN_MULTI-FAMILY_CONSTRUCTION_Present_methodologies_that_optimize_project_schedules_while_considering_trade-offs_betwe</a></li>
+</ul>
+<h2>Implementation Details</h2>
+<p>This project implements two components to demonstrate Resource-Aware Computing:</p>
+<ul>
+<li>
+<p><strong><code>ResourceAwareScheduler</code></strong>: A scheduler that takes a set of tasks, each with a defined cost in terms of CPU, energy, memory, and bandwidth. It then uses a greedy algorithm to find a schedule that maximizes the value of the completed tasks while staying within the resource budgets.</p>
+</li>
+<li>
+<p><strong><code>DVFSController</code></strong>: A controller for Dynamic Voltage and Frequency Scaling (DVFS), a technique used to optimize energy consumption in modern processors. The controller can select the optimal CPU frequency to either meet a deadline with the minimum energy, or to maximize performance within a given energy budget.</p>
+</li>
+</ul>
+</article>
+
+</section>
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Wed Nov 12 2025 14:13:12 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>
