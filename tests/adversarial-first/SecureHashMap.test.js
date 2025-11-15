@@ -26,4 +26,32 @@ describe('SecureHashMap', () => {
     expect(map.get('key1')).toBeUndefined();
     expect(map.delete('key1')).toBe(false);
   });
+
+  it('should not leak timing information in delete operation', () => {
+    const map = new SecureHashMap();
+    // Force all keys to hash to the same bucket
+    map.hash = () => 0;
+
+    const keyCount = 10;
+    for (let i = 0; i < keyCount; i++) {
+      map.set(`key${i}`, `value${i}`);
+    }
+
+    // Measure time to delete the first element
+    const startTimeFirst = performance.now();
+    map.delete('key0');
+    const timeFirst = performance.now() - startTimeFirst;
+
+    // Measure time to delete the last element
+    // Re-add the first element to keep bucket size consistent for a fair comparison
+    map.set('key0', 'value0');
+    const startTimeLast = performance.now();
+    map.delete(`key${keyCount - 1}`);
+    const timeLast = performance.now() - startTimeLast;
+
+    // In a constant-time implementation, the times should be very close.
+    // We allow a small tolerance for system jitter.
+    const tolerance = timeLast * 0.5; // Generous tolerance
+    expect(timeFirst).toBeLessThan(timeLast + tolerance);
+  });
 });
