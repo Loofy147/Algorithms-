@@ -145,25 +145,30 @@ export default class SecureHashMap {
     const idx = this.hash(key);
     const bucket = this.buckets[idx];
     let foundIdx = -1;
+    let found = false;
 
+    // Constant-time search: iterate through the entire bucket
     for (let i = 0; i < bucket.length; i++) {
-      if (this.constantTimeMode) {
-        if (this.constantTimeEquals(bucket[i][0], key)) {
-          foundIdx = i;
-        }
-      } else {
-        if (bucket[i][0] === key) {
-          foundIdx = i;
-          break;
-        }
-      }
+        const match = this.constantTimeEquals(bucket[i][0], key);
+        // Branchless assignment to avoid timing leaks
+        foundIdx = match ? i : foundIdx;
+        found = found || match;
     }
 
-    if (foundIdx !== -1) {
-      bucket.splice(foundIdx, 1);
-      return true;
+    // Perform the deletion outside the loop
+    if (found) {
+        // To keep the operation constant time, we can replace the found element
+        // with the last element and pop, which is faster than splice.
+        // However, for simplicity and since the bucket size is small, splice is acceptable
+        // as long as the search part is constant time.
+        // A more rigorous approach would involve a constant-time splice.
+        if (foundIdx !== bucket.length - 1) {
+            bucket[foundIdx] = bucket[bucket.length - 1];
+        }
+        bucket.pop();
     }
-    return false;
+
+    return found;
   }
 
   constantTimeEquals(a, b) {
