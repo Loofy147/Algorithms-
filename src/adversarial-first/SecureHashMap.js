@@ -49,9 +49,13 @@ export default class SecureHashMap {
     this.seed_k1 = this.cryptoRandomBigInt();
     this.buckets = Array(capacity).fill(null).map(() => []);
     this.maxChainLength = config.secureHashMap.maxChainLength;
-    this.collisionThreshold = config.secureHashMap.collisionThreshold;
-    this.collisionCount = 0;
     this.rehashCount = 0;
+    // Rate-limiting for collision detection
+    this.collisionTimestamps = [];
+    this.rateLimitConfig = {
+        maxEvents: 10, // Max collisions
+        timeWindow: 1000 // Per 1 second
+    };
     this.constantTimeMode = true;
   }
 
@@ -73,13 +77,20 @@ export default class SecureHashMap {
     const bucket = this.buckets[idx];
 
     if (bucket.length >= this.maxChainLength) {
-      this.collisionCount++;
-      logger.warn({ bucketIndex: idx, bucketLength: bucket.length }, 'Potential collision attack detected');
-      if (this.collisionCount >= this.collisionThreshold) {
-        logger.info('Collision threshold exceeded, initiating rehash...');
-        this.rehashWithNewSeed();
-        return this.set(key, value);
-      }
+        const now = Date.now();
+        this.collisionTimestamps.push(now);
+        // Evict timestamps older than the time window
+        this.collisionTimestamps = this.collisionTimestamps.filter(
+            ts => now - ts < this.rateLimitConfig.timeWindow
+        );
+        logger.warn({ bucketIndex: idx, bucketLength: bucket.length, recentCollisions: this.collisionTimestamps.length }, 'Potential collision detected');
+        // Check if the rate of collisions exceeds the configured threshold
+        if (this.collisionTimestamps.length >= this.rateLimitConfig.maxEvents) {
+            logger.error('High-rate collision attack detected, expanding map to mitigate...');
+            this.expand();
+            this.collisionTimestamps = []; // Reset after expansion
+            return this.set(key, value); // Retry the operation
+        }
     }
 
     let foundIdx = -1;
@@ -106,7 +117,7 @@ export default class SecureHashMap {
       bucket.push([key, value]);
     }
 
-    if (this.loadFactor() > 0.75) {
+    if (this.loadFactor() >= 0.75) {
       this.expand();
     }
   }
@@ -158,36 +169,48 @@ export default class SecureHashMap {
   constantTimeEquals(a, b) {
     const strA = String(a);
     const strB = String(b);
-    const maxLen = Math.max(strA.length, strB.length);
-    let diff = strA.length ^ strB.length;
-    for (let i = 0; i < maxLen; i++) {
-      const charA = i < strA.length ? strA.charCodeAt(i) : 0;
-      const charB = i < strB.length ? strB.charCodeAt(i) : 0;
-      diff |= charA ^ charB;
-    }
-    return diff === 0;
-  }
 
-  rehashWithNewSeed() {
-    this.rehashCount++;
-    logger.info({ rehashCount: this.rehashCount }, 'Rehashing with new random seed');
-    this.seed_k0 = this.cryptoRandomBigInt();
-    this.seed_k1 = this.cryptoRandomBigInt();
-    const oldBuckets = this.buckets;
-    this.buckets = Array(this.capacity).fill(null).map(() => []);
-    this.collisionCount = 0;
-    for (let bucket of oldBuckets) {
-      for (let [key, value] of bucket) {
-        const newIdx = this.hash(key);
-        this.buckets[newIdx].push([key, value]);
-      }
-    }
+    // Use SHA-256 to create fixed-length, collision-resistant hashes.
+    const hashA = crypto.createHash('sha256').update(strA).digest();
+    const hashB = crypto.createHash('sha256').update(strB).digest();
+
+    // crypto.timingSafeEqual requires buffers of the same length.
+    // Our hashes are always the same length (32 bytes for SHA-256).
+    return crypto.timingSafeEqual(hashA, hashB);
   }
 
   expand() {
-    logger.info({ oldCapacity: this.capacity, newCapacity: this.capacity * 2 }, 'Expanding hash map');
-    this.capacity *= 2;
-    this.rehashWithNewSeed();
+    this.rehashCount++;
+    const oldCapacity = this.capacity;
+    const newCapacity = oldCapacity * 2;
+    logger.info({ oldCapacity, newCapacity, rehashCount: this.rehashCount }, 'Expanding hash map');
+
+    const newSeed_k0 = this.cryptoRandomBigInt();
+    const newSeed_k1 = this.cryptoRandomBigInt();
+    const newBuckets = Array(newCapacity).fill(null).map(() => []);
+
+    // Helper function to hash with the new context
+    const newHash = (key) => {
+        const textEncoder = new TextEncoder();
+        const keyBytes = textEncoder.encode(String(key));
+        const hashValue = siphash24(keyBytes, newSeed_k0, newSeed_k1);
+        return Number(hashValue % BigInt(newCapacity));
+    };
+
+    // Re-hash all existing items into the new buckets
+    for (const bucket of this.buckets) {
+        for (const [key, value] of bucket) {
+            const newIdx = newHash(key);
+            newBuckets[newIdx].push([key, value]);
+        }
+    }
+
+    // Atomically swap to the new state
+    this.capacity = newCapacity;
+    this.buckets = newBuckets;
+    this.seed_k0 = newSeed_k0;
+    this.seed_k1 = newSeed_k1;
+    this.collisionTimestamps = []; // Reset rate-limiter
   }
 
   loadFactor() {
