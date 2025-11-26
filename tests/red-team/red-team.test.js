@@ -341,7 +341,7 @@ describe('RED TEAM: Transaction Rollback Attack Vectors', () => {
       (s) => ({...s, balance: s.balance - 50}),
       z.object({balance: z.number(), inventory: z.number(), logs: z.array(z.string())}),
       z.object({balance: z.number(), inventory: z.number(), logs: z.array(z.string())}),
-      (output, input) => {
+      (_, input) => {
         state.balance = input.balance; // Rollback
       }
     );
@@ -351,14 +351,14 @@ describe('RED TEAM: Transaction Rollback Attack Vectors', () => {
       (s) => ({...s, inventory: s.inventory - 5}),
       z.object({balance: z.number(), inventory: z.number(), logs: z.array(z.string())}),
       z.object({balance: z.number(), inventory: z.number(), logs: z.array(z.string())}),
-      (output, input) => {
+      () => {
         throw new Error('Rollback fails!'); // Rollback failure
       }
     );
 
     const op3 = new ComposableOperation(
       'log_transaction',
-      (s) => {
+      () => {
         throw new Error('Operation fails');
       },
       z.object({balance: z.number(), inventory: z.number(), logs: z.array(z.string())}),
@@ -425,7 +425,6 @@ describe('RED TEAM: SelfOptimizingCache Attack Vectors', () => {
       cache.get(`key_${i % 10}`);
     }
 
-    let stats1 = cache.getStats();
     const strategy1 = cache.currentStrategyName;
 
     // Phase 2: Suddenly switch to pattern that favors different strategy
@@ -434,7 +433,6 @@ describe('RED TEAM: SelfOptimizingCache Attack Vectors', () => {
       cache.put(`cold_${i}`, `data_${i}`);
     }
 
-    let stats2 = cache.getStats();
     const strategy2 = cache.currentStrategyName;
 
     // Phase 3: Switch back to original pattern

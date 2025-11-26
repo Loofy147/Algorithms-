@@ -27,6 +27,18 @@ This is more than a reference implementation. It's a professional toolkit built 
 - **Custom Error Handling**: Specific, custom error types (e.g., `TransactionError`) allow for robust and predictable error handling.
 - **Comprehensive Testing**: The project is validated with unit, integration, and performance tests.
 
+## Continuous Integration
+
+This project uses a robust CI/CD pipeline to ensure code quality and stability. The pipeline, defined in `.github/workflows/node.js.yml`, includes the following quality gates:
+
+- **Linting**: All code is linted using ESLint to enforce a consistent style and catch common errors.
+- **Vulnerability Auditing**: All dependencies are audited for known security vulnerabilities using `npm audit`.
+- **Automated Testing**: The full test suite is run on every push and pull request to the `main` branch.
+
+## Versioning
+
+This project uses [Semantic Versioning](https://semver.org/). The version number is automatically updated and a changelog is generated on every release. The release process is automated using `standard-version` and a manual GitHub Actions workflow.
+
 ## Getting Started
 
 ### Prerequisites
