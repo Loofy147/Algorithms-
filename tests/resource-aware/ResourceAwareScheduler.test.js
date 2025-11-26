@@ -79,4 +79,22 @@ describe('ResourceAwareScheduler', () => {
     // higher than the insensitive task's value of 25.
     expect(schedule[0].task).toBe('Low-Value, Carbon-Sensitive');
   });
+
+  it('should produce a valid and high-value schedule using the Genetic Algorithm', () => {
+    const budgets = { cpu: 10, memory: 100 };
+    const tasks = [
+        { name: 'Task A', value: 80, operations: 6e9, dataSize: 60, execute: () => {} },
+        { name: 'Task B', value: 50, operations: 4e9, dataSize: 40, execute: () => {} },
+    ];
+
+    // Run with the genetic algorithm scheduler
+    const gaScheduler = new ResourceAwareScheduler(budgets, null, 'genetic');
+    const { schedule: gaSchedule } = gaScheduler.optimizeSchedule(tasks);
+    const gaValue = gaSchedule.reduce((sum, task) => sum + tasks.find(t => t.name === task.task).value, 0);
+
+    // The optimal solution for this setup is to schedule both tasks A and B for a total value of 130.
+    expect(gaValue).toBe(130);
+    expect(gaSchedule.some(t => t.task === 'Task A')).toBe(true);
+    expect(gaSchedule.some(t => t.task === 'Task B')).toBe(true);
+  });
 });

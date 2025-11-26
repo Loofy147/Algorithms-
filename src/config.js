@@ -26,6 +26,8 @@ export const config = {
   scheduler: {
     // The carbon intensity (gCO2eq/kWh) below which a job is considered "green".
     lowCarbonThreshold: parseInt(process.env.LOW_CARBON_THRESHOLD, 10) || 200,
+    // The default optimization strategy ('greedy' or 'genetic').
+    strategy: process.env.SCHEDULER_STRATEGY || 'greedy',
   },
 
   // --- Adversarial-First Design ---
