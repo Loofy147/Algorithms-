@@ -1,17 +1,29 @@
-import { SimulatedCarbonIntensityAPI } from './SimulatedCarbonIntensityAPI.js';
-import { InfeasibleScheduleError } from '../errors.js';
-import { logger } from '../logger.js';
-import { config } from '../config.js';
+import {
+  SimulatedCarbonIntensityAPI
+} from './SimulatedCarbonIntensityAPI.js';
+import {
+  InfeasibleScheduleError
+} from '../errors.js';
+import {
+  logger
+} from '../logger.js';
+import {
+  config
+} from '../config.js';
+import {
+  GeneticAlgorithm
+} from '../self-modifying/GeneticAlgorithm.js';
 
 /**
  * Multi-Objective Task Scheduler
  */
 export default class ResourceAwareScheduler {
-  constructor(budgets, carbonIntensityAPI) {
+  constructor(budgets, carbonIntensityAPI, strategy = 'greedy') {
     this.budgets = budgets;
     this.consumed = Object.keys(budgets).reduce((acc, k) => ({...acc, [k]: 0}), {});
     this.tasks = [];
     this.carbonIntensityAPI = carbonIntensityAPI || new SimulatedCarbonIntensityAPI('default');
+    this.strategy = strategy;
   }
 
   estimateCost(task) {
@@ -73,7 +85,7 @@ export default class ResourceAwareScheduler {
     return { scheduled: true, result, resourcesUsed: check.cost };
   }
 
-  optimizeSchedule(candidateTasks) {
+  _greedyOptimize(candidateTasks) {
     const carbonIntensity = this.carbonIntensityAPI.getCarbonIntensity();
     const { lowCarbonThreshold } = config.scheduler;
 
@@ -87,25 +99,137 @@ export default class ResourceAwareScheduler {
       if (task.carbonSensitive && carbonIntensity < lowCarbonThreshold) {
         efficiency *= 3.0;
       }
-      return {task, efficiency, cost};
+      return { task, efficiency, cost };
     });
 
     scored.sort((a, b) => b.efficiency - a.efficiency);
 
+    const optimalSchedule = [];
+    const tempConsumed = Object.keys(this.budgets).reduce((acc, k) => ({ ...acc, [k]: 0 }), {});
+
+    for (const { task, cost } of scored) {
+      let feasible = true;
+      for (const resource in cost) {
+        if (!this.budgets[resource]) continue;
+        if ((tempConsumed[resource] + cost[resource]) > this.budgets[resource]) {
+          feasible = false;
+          break;
+        }
+      }
+      if (feasible) {
+        optimalSchedule.push(task);
+        for (const resource in cost) {
+          if (tempConsumed[resource] !== undefined) {
+            tempConsumed[resource] += cost[resource];
+          }
+        }
+      }
+    }
+    return optimalSchedule;
+  }
+
+  _geneticAlgorithmOptimize(candidateTasks) {
+    const taskCosts = new Map(candidateTasks.map(task => [task.name, this.estimateCost(task)]));
+
+    const fitnessFunction = (scheduleGene) => {
+        let totalValue = 0;
+        const consumed = Object.keys(this.budgets).reduce((acc, k) => ({ ...acc, [k]: 0 }), {});
+
+        for (let i = 0; i < scheduleGene.length; i++) {
+            if (scheduleGene[i] === 1) {
+                const task = candidateTasks[i];
+                const cost = taskCosts.get(task.name);
+                totalValue += task.value || 1;
+                for (const resource in cost) {
+                    if (consumed[resource] !== undefined) {
+                        consumed[resource] += cost[resource];
+                    }
+                }
+            }
+        }
+
+        let totalPenalty = 0;
+        for (const resource in this.budgets) {
+            if (consumed[resource] > this.budgets[resource]) {
+                // Return a fitness of 0 for any invalid schedule.
+                // This is a simple but effective way to handle constraints.
+                return 0;
+            }
+        }
+
+        return totalValue;
+    };
+
+    const generateInitialGene = () => {
+      return candidateTasks.map(() => Math.random() > 0.5 ? 1 : 0);
+    };
+
+    const crossoverFunction = (parent1, parent2) => {
+      const midpoint = Math.floor(Math.random() * parent1.length);
+      const child = parent1.slice(0, midpoint).concat(parent2.slice(midpoint));
+      return child;
+    };
+
+    const mutationFunction = (gene) => {
+      const index = Math.floor(Math.random() * gene.length);
+      gene[index] = gene[index] === 1 ? 0 : 1;
+      return gene;
+    };
+
+    const ga = new GeneticAlgorithm({
+      fitnessFunction,
+      crossoverFunction,
+      mutationFunction,
+      generateInitialGene,
+      populationSize: 50,
+      mutationRate: 0.02,
+      crossoverRate: 0.9,
+      elitismCount: 2
+    });
+
+    // Evolution loop
+    const generations = 100;
+    for (let i = 0; i < generations; i++) {
+      ga.evolve();
+    }
+
+    const bestGene = ga.getFittest().gene;
+    const optimalSchedule = candidateTasks.filter((_, i) => bestGene[i] === 1);
+
+    return optimalSchedule;
+  }
+
+  optimizeSchedule(candidateTasks) {
+    let optimalSchedulePlan;
+    switch (this.strategy) {
+      case 'genetic':
+        optimalSchedulePlan = this._geneticAlgorithmOptimize(candidateTasks);
+        break;
+      case 'greedy':
+      default:
+        optimalSchedulePlan = this._greedyOptimize(candidateTasks);
+        break;
+    }
+
     const schedule = [];
     const rejections = [];
-    for (let {task} of scored) {
+    const scheduledTaskNames = new Set(optimalSchedulePlan.map(t => t.name));
+
+    // Execute the planned schedule
+    for (const task of optimalSchedulePlan) {
       try {
         const result = this.scheduleTask(task);
         schedule.push({ task: task.name, scheduled: true, ...result });
       } catch (error) {
-        if (error instanceof InfeasibleScheduleError) {
-          logger.warn({ taskName: task.name, violations: error.violations }, 'Task rejected due to resource constraints');
-          rejections.push({ task: task.name, scheduled: false, reason: error.message, violations: error.violations });
-        } else {
-          logger.error({ err: error, taskName: task.name }, 'An unexpected error occurred during scheduling');
-          rejections.push({ task: task.name, scheduled: false, reason: 'Unexpected error' });
-        }
+        logger.error({ err: error, taskName: task.name }, 'Task from optimal plan failed to schedule');
+        rejections.push({ task: task.name, scheduled: false, reason: 'Failed execution despite being in optimal plan', violations: error.violations });
+      }
+    }
+
+    // Identify tasks that were not in the final plan
+    for (const task of candidateTasks) {
+      if (!scheduledTaskNames.has(task.name)) {
+        rejections.push({ task: task.name, scheduled: false, reason: 'Not selected by optimization strategy' });
       }
     }
 

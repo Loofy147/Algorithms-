@@ -1,122 +1,127 @@
 import { config } from '../config.js';
 
-export class City {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-  }
-  distanceTo(city) {
-    const xDistance = Math.abs(this.x - city.x);
-    const yDistance = Math.abs(this.y - city.y);
-    return Math.sqrt(xDistance * xDistance + yDistance * yDistance);
-  }
-}
+// --- Generic Genetic Algorithm Engine ---
 
-export class Chromosome {
-  constructor(genes, cities) {
-    this.genes = genes;
-    this.cities = cities;
-    this.distance = this.calculateDistance();
-  }
-  calculateDistance() {
-    let totalDistance = 0;
-    for (let i = 0; i < this.genes.length - 1; i++) {
-      totalDistance += this.cities[this.genes[i]].distanceTo(this.cities[this.genes[i + 1]]);
-    }
-    totalDistance += this.cities[this.genes[this.genes.length - 1]].distanceTo(this.cities[this.genes[0]]);
-    return totalDistance;
-  }
-}
-
-export class Population {
-  constructor(populationSize, numCities, cities) {
-    this.chromosomes = [];
-    this.cities = cities;
-    for (let i = 0; i < populationSize; i++) {
-      this.chromosomes.push(this.createRandomChromosome(numCities));
-    }
-  }
-  createRandomChromosome(numCities) {
-    const genes = [...Array(numCities).keys()];
-    for (let i = genes.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [genes[i], genes[j]] = [genes[j], genes[i]];
-    }
-    return new Chromosome(genes, this.cities);
-  }
-  getFittest() {
-    return this.chromosomes.reduce((a, b) => (a.distance < b.distance ? a : b));
-  }
-}
-
+/**
+ * A generic Genetic Algorithm engine.
+ *
+ * This class is designed to be problem-agnostic. It requires the user to provide
+ * the core genetic operators (fitness function, crossover, mutation) and initial
+ * gene generation logic. This allows it to be applied to a wide range of
+ * optimization problems beyond its original TSP implementation.
+ */
 export class GeneticAlgorithm {
-  constructor(numCities, cities, options = {}) {
-    const {
-      populationSize = config.geneticAlgorithm.populationSize,
-      mutationRate = config.geneticAlgorithm.mutationRate,
-      crossoverRate = config.geneticAlgorithm.crossoverRate
-    } = options;
-    this.population = new Population(populationSize, numCities, cities);
-    this.mutationRate = mutationRate;
-    this.crossoverRate = crossoverRate;
-    this.cities = cities;
+  /**
+   * @param {object} options - Configuration for the GA.
+   * @param {function} options.fitnessFunction - A function that takes a 'gene' and returns a numerical fitness score (higher is better).
+   * @param {function} options.crossoverFunction - A function that takes two parent genes and returns a new offspring gene.
+   * @param {function} options.mutationFunction - A function that takes a gene and returns a mutated version of it.
+   * @param {function} options.generateInitialGene - A function that generates a single random gene.
+   * @param {number} [options.populationSize=50] - The number of individuals in the population.
+   * @param {number} [options.mutationRate=0.01] - The probability of a mutation occurring.
+   * @param {number} [options.crossoverRate=0.95] - The probability of a crossover occurring.
+   * @param {number} [options.elitismCount=2] - The number of top individuals to carry over to the next generation.
+   */
+  constructor(options) {
+    this.options = {
+      populationSize: config.geneticAlgorithm.populationSize || 50,
+      mutationRate: config.geneticAlgorithm.mutationRate || 0.01,
+      crossoverRate: config.geneticAlgorithm.crossoverRate || 0.95,
+      elitismCount: config.geneticAlgorithm.elitismCount || 2,
+      ...options
+    };
+
+    // Validate that all required functions are provided.
+    if (typeof this.options.fitnessFunction !== 'function' ||
+        typeof this.options.crossoverFunction !== 'function' ||
+        typeof this.options.mutationFunction !== 'function' ||
+        typeof this.options.generateInitialGene !== 'function') {
+      throw new Error('GA requires fitness, crossover, mutation, and gene generation functions.');
+    }
+
+    this.population = this.initializePopulation();
   }
 
+  /**
+   * Generates the initial population of individuals.
+   * @returns {Array<object>} An array of individuals, each with a 'gene' and a 'fitness' score.
+   */
+  initializePopulation() {
+    const population = [];
+    for (let i = 0; i < this.options.populationSize; i++) {
+      const gene = this.options.generateInitialGene();
+      population.push({
+        gene,
+        fitness: this.options.fitnessFunction(gene),
+      });
+    }
+    return population;
+  }
+
+  /**
+   * Selects an individual from the population using tournament selection.
+   * @param {number} [tournamentSize=5] - The number of individuals to select for the tournament.
+   * @returns {object} The fittest individual from the tournament.
+   */
+  tournamentSelection(tournamentSize = 5) {
+    let best = null;
+    for (let i = 0; i < tournamentSize; i++) {
+      const randomIndex = Math.floor(Math.random() * this.population.length);
+      const individual = this.population[randomIndex];
+      if (best === null || individual.fitness > best.fitness) {
+        best = individual;
+      }
+    }
+    return best;
+  }
+
+  /**
+   * Evolves the population for one generation.
+   * @returns {void}
+   */
   evolve() {
-    const newChromosomes = [this.population.getFittest()]; // Elitism
-    while (newChromosomes.length < this.population.chromosomes.length) {
+    // Sort the population by fitness in descending order.
+    this.population.sort((a, b) => b.fitness - a.fitness);
+
+    const newPopulation = [];
+
+    // Apply elitism: carry over the best individuals.
+    for (let i = 0; i < this.options.elitismCount; i++) {
+      newPopulation.push(this.population[i]);
+    }
+
+    // Generate the rest of the new population through selection, crossover, and mutation.
+    while (newPopulation.length < this.options.populationSize) {
       const parent1 = this.tournamentSelection();
       const parent2 = this.tournamentSelection();
-      const offspring = this.crossover(parent1, parent2);
-      this.mutate(offspring);
-      newChromosomes.push(offspring);
-    }
-    this.population.chromosomes = newChromosomes;
-  }
 
-  tournamentSelection(tournamentSize = 5) {
-    let fittest = null;
-    for (let i = 0; i < tournamentSize; i++) {
-      const randomIndex = Math.floor(Math.random() * this.population.chromosomes.length);
-      const chromosome = this.population.chromosomes[randomIndex];
-      if (fittest === null || chromosome.distance < fittest.distance) {
-        fittest = chromosome;
+      let offspringGene;
+      if (Math.random() < this.options.crossoverRate) {
+        offspringGene = this.options.crossoverFunction(parent1.gene, parent2.gene);
+      } else {
+        offspringGene = parent1.gene; // Pass through one of the parents if no crossover.
       }
-    }
-    return fittest;
-  }
 
-  crossover(parent1, parent2) {
-    if (Math.random() > this.crossoverRate) {
-      // No crossover, return a clone of the first parent
-      return new Chromosome([...parent1.genes], this.cities);
-    }
-
-    const start = Math.floor(Math.random() * parent1.genes.length);
-    const end = Math.floor(Math.random() * (parent1.genes.length - start)) + start + 1;
-
-    const offspringGenes = parent1.genes.slice(start, end);
-    const parent2Genes = parent2.genes.filter(gene => !offspringGenes.includes(gene));
-
-    const finalGenes = [...offspringGenes, ...parent2Genes];
-
-    // This ensures the offspring is always a valid permutation
-    if (finalGenes.length !== parent1.genes.length) {
-        // Fallback in case of logic error, though the above should be correct.
-        return new Chromosome([...parent1.genes], this.cities);
-    }
-
-    return new Chromosome(finalGenes, this.cities);
-  }
-
-  mutate(chromosome) {
-    for (let i = 0; i < chromosome.genes.length; i++) {
-      if (Math.random() < this.mutationRate) {
-        const j = Math.floor(Math.random() * chromosome.genes.length);
-        [chromosome.genes[i], chromosome.genes[j]] = [chromosome.genes[j], chromosome.genes[i]];
+      if (Math.random() < this.options.mutationRate) {
+        offspringGene = this.options.mutationFunction(offspringGene);
       }
+
+      newPopulation.push({
+        gene: offspringGene,
+        fitness: this.options.fitnessFunction(offspringGene),
+      });
     }
-    // After mutation, the distance needs to be recalculated.
-    chromosome.distance = chromosome.calculateDistance();
+
+    this.population = newPopulation;
+  }
+
+  /**
+   * Retrieves the individual with the highest fitness score in the current population.
+   * @returns {object} The best individual found so far.
+   */
+  getFittest() {
+    return this.population.reduce((best, current) => {
+      return (current.fitness > best.fitness) ? current : best;
+    }, this.population[0]);
   }
 }
