@@ -94,28 +94,37 @@ export default class SecureHashMap {
     }
 
     let foundIdx = -1;
-    let found = false;
+    let isFound = 0; // Use a number to enable branchless updates
+
     if (this.constantTimeMode) {
-      for (let i = 0; i < bucket.length; i++) {
-        const match = this.constantTimeEquals(bucket[i][0], key);
-        foundIdx = match ? i : foundIdx;
-        found = found || match;
-      }
-    } else {
-      for (let i = 0; i < bucket.length; i++) {
-        if (bucket[i][0] === key) {
-          found = true;
-          foundIdx = i;
-          break;
+        for (let i = 0; i < bucket.length; i++) {
+            const match = this.constantTimeEquals(bucket[i][0], key);
+            // Branchless conditional assignment for the index
+            foundIdx = match ? i : foundIdx;
+            // Branchless flag update (avoids short-circuiting `||`)
+            isFound |= match ? 1 : 0;
         }
-      }
+    } else {
+        // This path is not constant-time by definition, but we can still use the new logic
+        for (let i = 0; i < bucket.length; i++) {
+            if (bucket[i][0] === key) {
+                isFound = 1;
+                foundIdx = i;
+                break;
+            }
+        }
     }
 
-    if (found) {
-      bucket[foundIdx][1] = value;
-    } else {
-      bucket.push([key, value]);
-    }
+    // Determine target index and key to store without branching.
+    // If found, target the existing index. If not, target the end of the array.
+    const targetIdx = isFound === 1 ? foundIdx : bucket.length;
+    // If found, preserve the original key object. If not, use the new key.
+    const keyToStore = isFound === 1 ? bucket[targetIdx][0] : key;
+
+    // Perform a "blind write" to handle both insert and update.
+    // This removes the explicit `if/else` branch, which is the primary
+    // source of the timing side-channel vulnerability.
+    bucket[targetIdx] = [keyToStore, value];
 
     if (this.loadFactor() >= 0.75) {
       this.expand();
@@ -145,30 +154,35 @@ export default class SecureHashMap {
     const idx = this.hash(key);
     const bucket = this.buckets[idx];
     let foundIdx = -1;
-    let found = false;
+    let isFound = 0; // Use 0 or 1 for branchless logic
 
-    // Constant-time search: iterate through the entire bucket
+    // 1. Constant-time search.
     for (let i = 0; i < bucket.length; i++) {
         const match = this.constantTimeEquals(bucket[i][0], key);
-        // Branchless assignment to avoid timing leaks
         foundIdx = match ? i : foundIdx;
-        found = found || match;
+        isFound |= match ? 1 : 0;
     }
 
-    // Perform the deletion outside the loop
-    if (found) {
-        // To keep the operation constant time, we can replace the found element
-        // with the last element and pop, which is faster than splice.
-        // However, for simplicity and since the bucket size is small, splice is acceptable
-        // as long as the search part is constant time.
-        // A more rigorous approach would involve a constant-time splice.
-        if (foundIdx !== bucket.length - 1) {
-            bucket[foundIdx] = bucket[bucket.length - 1];
-        }
-        bucket.pop();
+    // 2. Fully branchless swap-and-truncate.
+    const lastIdx = bucket.length - 1;
+    if (lastIdx >= 0) {
+        const lastElement = bucket[lastIdx];
+
+        // Branchless selection of the index to overwrite.
+        // If found, this is the key's index.
+        // If not found, this is the last index, making the swap a no-op
+        // (the last element is swapped with itself).
+        const indexToOverwrite = isFound === 1 ? foundIdx : lastIdx;
+
+        // Unconditionally perform the swap.
+        bucket[indexToOverwrite] = lastElement;
+
+        // Unconditionally truncate the array length.
+        // If found, length decreases by 1. If not, it remains the same.
+        bucket.length = lastIdx + 1 - isFound;
     }
 
-    return found;
+    return isFound === 1;
   }
 
   constantTimeEquals(a, b) {
