@@ -77,4 +77,21 @@ describe('CircuitBreaker', () => {
     await expect(circuitBreaker.execute(failingFunction)).rejects.toThrow('Failure');
     expect(circuitBreaker.state).toBe('OPEN');
   });
+
+  it('BUG: should reset failure count after a timeout period without tripping', async () => {
+    // Fail once
+    await expect(circuitBreaker.execute(failingFunction)).rejects.toThrow('Failure');
+    expect(circuitBreaker.failureCount).toBe(1);
+
+    // Wait longer than the reset timeout
+    await wait(110);
+
+    // Fail again
+    await expect(circuitBreaker.execute(failingFunction)).rejects.toThrow('Failure');
+
+    // With the bug, failureCount will be 2, tripping the circuit.
+    // The correct behavior is for the count to reset to 1.
+    expect(circuitBreaker.failureCount).toBe(1);
+    expect(circuitBreaker.state).toBe('CLOSED'); // Should not trip
+  });
 });
