@@ -1,4 +1,3 @@
-import ResourceAwareScheduler from '../../src/resource-aware/ResourceAwareScheduler.js';
 import DVFSController from '../../src/resource-aware/DVFSController.js';
 
 /**
@@ -11,28 +10,10 @@ import DVFSController from '../../src/resource-aware/DVFSController.js';
 describe('ResourceAwareScheduler and DVFSController Integration', () => {
   it('should cause the DVFS controller to scale up under high load and down under low load', () => {
     // 1. Arrange: Set up the components and initial state
-    const budgets = { cpu: 1000, energy: 1e6, memory: 1e6 };
-    const scheduler = new ResourceAwareScheduler(budgets);
     const controller = new DVFSController();
 
     // Initially, the controller should be in a balanced state
     expect(controller.getCurrentState().name).toBe('Balanced');
-
-    // Define a set of high-load tasks
-    const highLoadTasks = Array.from({ length: 10 }, (_, i) => ({
-      name: `High CPU Task ${i}`,
-      operations: 8e9, // High CPU cost
-      value: 10,
-      execute: () => 'complete',
-    }));
-
-    // Define a single low-load task
-    const lowLoadTask = {
-      name: 'Low CPU Task',
-      operations: 1e8, // Low CPU cost
-      value: 5,
-      execute: () => 'complete',
-    };
 
     // 2. Act: Simulate a period of high load by repeatedly telling the controller the load is high
     console.log('--- Simulating High Load ---');

@@ -1,4 +1,3 @@
-import { jest } from '@jest/globals';
 import { LFUCache } from '../../src/self-modifying/CachingStrategies.js';
 
 describe('LFUCache Tie-Breaking Logic', () => {
