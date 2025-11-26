@@ -61,7 +61,12 @@ export class CircuitBreaker {
       this.reset();
       return result;
     } catch (error) {
-      this.failureCount++;
+      if (this.lastFailureTime && (Date.now() - this.lastFailureTime) > this.resetTimeout) {
+        this.failureCount = 1;
+      } else {
+        this.failureCount++;
+      }
+      this.lastFailureTime = Date.now();
       if (this.failureCount >= this.failureThreshold) {
         this.trip();
       }
