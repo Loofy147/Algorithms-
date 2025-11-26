@@ -82,6 +82,9 @@ export class LFUCache extends BaseCache {
   get(key) {
     const value = super.get(key);
     if (value !== null) {
+      // Move to end to mark as recently used for tie-breaking
+      this.cache.delete(key);
+      this.cache.set(key, value);
       this._updateFrequency(key);
     }
     return value;
@@ -91,6 +94,7 @@ export class LFUCache extends BaseCache {
     if (this.capacity === 0) return;
 
     if (this.cache.has(key)) {
+      this.cache.delete(key);
       this.cache.set(key, value);
       this._updateFrequency(key);
       return;
