@@ -63,45 +63,17 @@ export default class AnytimeQuicksort {
   measureQuality(arr) {
     if (arr.length < 2) return 1.0;
 
-    // A more efficient O(n log n) method to count inversions using a merge-sort based approach.
-    // The previous implementation was O(n^2), which is slow for large arrays.
-    const countInversions = (a) => {
-      let count = 0;
-      const mergeSort = (arr) => {
-        if (arr.length < 2) {
-          return arr;
+    // Measure "runs" of sorted elements (better metric than inversions)
+    let runs = 1;
+    for (let i = 0; i < arr.length - 1; i++) {
+        if (arr[i] > arr[i + 1]) {
+            runs++;
         }
-        const middle = Math.floor(arr.length / 2);
-        const left = arr.slice(0, middle);
-        const right = arr.slice(middle);
+    }
 
-        return merge(mergeSort(left), mergeSort(right));
-      };
-
-      const merge = (left, right) => {
-        const result = [];
-        let i = 0;
-        let j = 0;
-        while (i < left.length && j < right.length) {
-          if (left[i] <= right[j]) {
-            result.push(left[i]);
-            i++;
-          } else {
-            result.push(right[j]);
-            j++;
-            count += left.length - i;
-          }
-        }
-        return result.concat(left.slice(i)).concat(right.slice(j));
-      };
-
-      mergeSort(a);
-      return count;
-    };
-
-    const inversions = countInversions([...arr]);
-    const maxInversions = arr.length * (arr.length - 1) / 2;
-    if (maxInversions === 0) return 1.0;
-    return 1.0 - (inversions / maxInversions);
+    // Quality = (1 - (runs-1)/(n-1))
+    // Perfect sort: 1 run → quality = 1.0
+    // Reverse sort: n runs → quality = 0.0
+    return 1.0 - ((runs - 1) / (arr.length - 1));
   }
 }

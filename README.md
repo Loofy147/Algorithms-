@@ -1,12 +1,21 @@
-# Advanced Computational Principles: A Production-Ready Toolkit
+# Advanced Computational Principles: A Research Toolkit
 
-This project provides production-ready JavaScript implementations of seven advanced computational principles. These concepts, often confined to academic papers, are essential for building robust, efficient, and secure real-world systems. This toolkit is designed not just for learning, but as a reliable foundation for production use.
+This project provides JavaScript implementations of seven advanced computational principles. These concepts, often confined to academic papers, are essential for building robust, efficient, and secure systems. This toolkit is designed as a learning and research tool to explore these powerful ideas.
 
-Our development is guided by a strict **[Professional Working Methodology](./METHODOLOGY.md)**, emphasizing a research-implement-verify workflow to ensure the highest quality.
+Our development is guided by a strict **[Professional Working Methodology](./METHODOLOGY.md)**, emphasizing a research-implement-verify workflow to ensure high-quality, understandable code.
+
+## Vision
+
+This is a **research toolkit** for exploring advanced computational concepts. It is intended for:
+- CS researchers exploring anytime algorithms
+- Graduate students in distributed systems
+- Engineers learning resource-aware computing
+
+It is **NOT** intended for direct production deployment. For production systems, please use battle-tested, specialized libraries.
 
 ## Principles Implemented
 
-Each principle is implemented as a self-contained, professional-grade module. For detailed documentation on the theory and research behind each, please see the `docs/` directory.
+Each principle is implemented as a self-contained module. For detailed documentation on the theory and research behind each, please see the `docs/` directory.
 
 | Principle | Key Implementation | Description | Use Case |
 | :--- | :--- | :--- | :--- |
@@ -18,12 +27,12 @@ Each principle is implemented as a self-contained, professional-grade module. Fo
 | **Self-Modifying Algorithms**| `SelfOptimizingCache`| A cache that uses a multi-armed bandit to dynamically select the best strategy.| **[Adaptive CDN](./examples/self-modifying-use-case.js)** |
 | **Uncertainty Quantification**| `ProbabilisticCounter`| A counter that provides statistically sound confidence intervals (Wilson, Agresti-Coull). | **[Real-time Polling](./examples/uncertainty-quantification-use-case.js)** |
 
-## Production-Ready Features
+## Project Features
 
-This is more than a reference implementation. It's a professional toolkit built with:
+While not designed for production, this toolkit is built with professional software engineering practices:
 
 - **Centralized Configuration**: All algorithmic parameters are managed in `src/config.js` and can be overridden with environment variables.
-- **Structured Logging**: The entire system uses `pino` for structured, leveled logging, essential for production observability.
+- **Structured Logging**: The entire system uses `pino` for structured, leveled logging, which is essential for observability and debugging.
 - **Custom Error Handling**: Specific, custom error types (e.g., `TransactionError`) allow for robust and predictable error handling.
 - **Comprehensive Testing**: The project is validated with unit, integration, and performance tests.
 
@@ -82,7 +91,3 @@ npm run docs:generate
 ```
 
 This will create a `docs/api` directory with a searchable, navigable website detailing all classes and methods.
-
-### Deployment
-
-This project can be deployed as a containerized application. For detailed instructions on deploying to a cloud environment, see the **[Hugging Face Deployment Guide](./DEPLOY_TO_HUGGINGFACE.md)**.

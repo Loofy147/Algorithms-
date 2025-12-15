@@ -174,8 +174,10 @@ export default class SecureHashMap {
         // (the last element is swapped with itself).
         const indexToOverwrite = isFound === 1 ? foundIdx : lastIdx;
 
-        // Unconditionally perform the swap.
-        bucket[indexToOverwrite] = lastElement;
+        // Unconditionally perform the swap. A deep copy is used here to
+        // prevent multiple bucket entries from referencing the same [key, value]
+        // array, which could lead to unintended side-effects.
+        bucket[indexToOverwrite] = [lastElement[0], lastElement[1]];
 
         // Unconditionally truncate the array length.
         // If found, length decreases by 1. If not, it remains the same.
