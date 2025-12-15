@@ -20,10 +20,11 @@ describe('AnytimeQuicksort', () => {
 
   it('should correctly measure the quality of a partially sorted array', () => {
     const sorter = new AnytimeQuicksort(100);
-    const partiallySorted = [5, 1, 2, 3, 4]; // 4 inversions: (5,1), (5,2), (5,3), (5,4)
+    // This array has two "runs": [5] and [1, 2, 3, 4].
+    const partiallySorted = [5, 1, 2, 3, 4];
     const quality = sorter.measureQuality(partiallySorted);
-    const maxInversions = partiallySorted.length * (partiallySorted.length - 1) / 2; // 10
-    const expectedQuality = 1.0 - (4 / maxInversions);
+    // For 2 runs in an array of length 5, quality is 1 - ((2-1)/(5-1)) = 0.75
+    const expectedQuality = 0.75;
     expect(quality).toBe(expectedQuality);
   });
 });

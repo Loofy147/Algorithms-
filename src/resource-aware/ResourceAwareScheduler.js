@@ -148,16 +148,16 @@ export default class ResourceAwareScheduler {
             }
         }
 
-        let totalPenalty = 0;
+        let penalty = 0;
         for (const resource in this.budgets) {
             if (consumed[resource] > this.budgets[resource]) {
-                // Return a fitness of 0 for any invalid schedule.
-                // This is a simple but effective way to handle constraints.
-                return 0;
+                const violation = consumed[resource] - this.budgets[resource];
+                const relativeViolation = violation / this.budgets[resource];
+                penalty += relativeViolation * 1000; // Gradient penalty
             }
         }
 
-        return totalValue;
+        return Math.max(0, totalValue - penalty);
     };
 
     const generateInitialGene = () => {
