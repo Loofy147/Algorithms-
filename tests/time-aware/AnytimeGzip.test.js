@@ -1,11 +1,15 @@
 import { gunzipSync } from 'zlib';
+import { jest } from '@jest/globals';
 import AnytimeGzip from '../../src/time-aware/AnytimeGzip.js';
 
+import { gzipSync, constants } from 'zlib';
+
 describe('AnytimeGzip', () => {
-  const testData = Buffer.from('a'.repeat(10000)); // Highly compressible data
+  // Use a larger buffer (1MB) to make the compression time more significant
+  const testData = Buffer.from('a'.repeat(1 * 1024 * 1024));
 
   it('should compress data within a generous deadline', () => {
-    const compressor = new AnytimeGzip(100); // 100ms is plenty of time
+    const compressor = new AnytimeGzip(1000); // 1000ms is plenty of time for 1MB
     const result = compressor.compress(testData);
 
     expect(result.buffer).toBeInstanceOf(Buffer);
@@ -18,14 +22,20 @@ describe('AnytimeGzip', () => {
   });
 
   it('should return a lower-quality result if the deadline is very short', () => {
-    // A long deadline should produce the best possible compression
-    const highQualityCompressor = new AnytimeGzip(200);
+    jest.setTimeout(10000); // Set a longer timeout for this specific test
+    // A long deadline should produce the best possible compression (level 9)
+    const highQualityCompressor = new AnytimeGzip(5000); // 5 seconds, very generous
     const highQualityResult = highQualityCompressor.compress(testData);
+    expect(highQualityResult.level).toBe(9); // Explicitly check for level 9
 
-    // A very short deadline should force it to stop at a lower compression level
-    const lowQualityCompressor = new AnytimeGzip(1); // 1ms is very tight
+    // A very short deadline should force an early exit after the first level.
+    const lowQualityCompressor = new AnytimeGzip(1); // 1ms is extremely tight
     const lowQualityResult = lowQualityCompressor.compress(testData);
 
+    // The low quality result should have stopped at the fastest level.
+    expect(lowQualityResult.level).toBe(1);
+
+    // The levels and quality must be different.
     expect(lowQualityResult.level).not.toBe(highQualityResult.level);
     expect(lowQualityResult.quality).toBeLessThan(highQualityResult.quality);
   });

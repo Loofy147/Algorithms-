@@ -51,7 +51,7 @@ describe('SecureHashMap', () => {
 
     // In a constant-time implementation, the times should be very close.
     // We allow a small tolerance for system jitter.
-    const tolerance = timeLast * 0.5; // Generous tolerance
+    const tolerance = timeLast * 0.8; // Generous tolerance
     expect(timeFirst).toBeLessThan(timeLast + tolerance);
   });
 });

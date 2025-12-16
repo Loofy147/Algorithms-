@@ -36,6 +36,7 @@
   "dependencies": {
     "dotenv": "^17.2.3",
     "pino": "^10.1.0",
+    "sharp": "^0.34.5",
     "simple-statistics": "^7.8.8",
     "zod": "4.1.12"
   }
