@@ -14,7 +14,7 @@ Each principle is implemented as a self-contained module. For detailed documenta
 
 | Principle | Key Implementation | Description | Use Case |
 | :--- | :--- | :--- | :--- |
-| **Time-Aware Computing** | `AnytimeQuicksort`, `AnytimeGzip`, `AnytimeSHA256` | Algorithms that can be stopped at any time to return a result of improving quality, or that can be gracefully interrupted to meet a deadline. | **[Real-time UI](./examples/real-world-anytime-sort.js)**, **[Real-time Compression](./examples/real-world-anytime-gzip.js)**, **[Interruptible Hashing](./examples/real-world-anytime-sha256.js)** |
+| **Time-Aware Computing** | `AnytimeQuicksort`, `AnytimeGzip`, `AnytimeSHA256`, `AnytimeImageResize` | Algorithms that can be stopped at any time to return a result of improving quality, or that can be gracefully interrupted to meet a deadline. | **[Real-time UI](./examples/real-world-anytime-sort.js)**, **[Real-time Compression](./examples/real-world-anytime-gzip.js)**, **[Interruptible Hashing](./examples/real-world-anytime-sha256.js)**, **[Progressive Image Loading](./examples/real-world-anytime-resize.js)** |
 | **Resource-Aware Computing**| `ResourceAwareScheduler` | A multi-objective scheduler that optimizes for CPU, energy, and carbon. | **[Cloud Cost Management](./examples/resource-aware-use-case.js)** |
 | **Adversarial-First Design**| `SecureHashMap` | A hash map resistant to collision-based denial-of-service attacks. | **[Secure Caching Server](./examples/adversarial-first-use-case.js)** |
 | **Algebraic Composability**| `composeWithTransaction`| A Saga-pattern orchestrator for building resilient, multi-step transactions. | **[Financial Transaction](./examples/algebraic-composability-use-case.js)** |

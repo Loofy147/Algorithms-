@@ -1,5 +1,9 @@
 import { constants, gzipSync } from 'zlib';
+import { z } from 'zod';
 import { logger } from '../logger.js';
+
+const deadlineSchema = z.number().nonnegative({ message: 'Deadline must be a non-negative number.' });
+const bufferSchema = z.instanceof(Buffer, { message: 'Input must be a Buffer.' });
 
 /**
  * An "anytime" Gzip compression algorithm that progressively improves
@@ -7,6 +11,7 @@ import { logger } from '../logger.js';
  */
 export default class AnytimeGzip {
   constructor(deadline) {
+    deadlineSchema.parse(deadline);
     this.deadline = deadline;
     this.startTime = null;
   }
@@ -24,18 +29,14 @@ export default class AnytimeGzip {
    * }} The compression result.
    */
   compress(inputBuffer) {
+    bufferSchema.parse(inputBuffer);
     this.startTime = Date.now();
     let bestBuffer = null;
     let bestLevel = -1;
 
-    // zlib compression levels range from 1 (best speed) to 9 (best compression).
-    // We iterate from fastest to slowest through a few representative levels.
-    const levels = [
-      constants.Z_BEST_SPEED, // Level 1
-      3,
-      constants.Z_DEFAULT_COMPRESSION, // Level 6
-      constants.Z_BEST_COMPRESSION, // Level 9
-    ];
+    // To simplify the anytime behavior and make it more predictable, we will
+    // only use the fastest and best compression levels.
+    const levels = [1, 9];
 
     for (const level of levels) {
       if (this.timeExceeded()) {

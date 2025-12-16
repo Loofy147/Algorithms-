@@ -181,16 +181,32 @@ export default class ResourceAwareScheduler {
       crossoverFunction,
       mutationFunction,
       generateInitialGene,
-      populationSize: 50,
-      mutationRate: 0.02,
+      populationSize: 100, // Increased population size
+      mutationRate: 0.05, // Increased mutation rate
       crossoverRate: 0.9,
       elitismCount: 2
     });
 
     // Evolution loop
-    const generations = 100;
-    for (let i = 0; i < generations; i++) {
+    const maxGenerations = 500;
+    let stableGenerations = 0;
+    let lastBestFitness = -1;
+    const convergenceThreshold = 50; // Number of generations without improvement to consider converged
+
+    for (let i = 0; i < maxGenerations; i++) {
       ga.evolve();
+      const currentBestFitness = ga.getFittest().fitness;
+      if (currentBestFitness > lastBestFitness) {
+        lastBestFitness = currentBestFitness;
+        stableGenerations = 0;
+      } else {
+        stableGenerations++;
+      }
+
+      if (stableGenerations >= convergenceThreshold) {
+        logger.info({ generation: i, fitness: currentBestFitness }, 'Genetic algorithm converged.');
+        break;
+      }
     }
 
     const bestGene = ga.getFittest().gene;

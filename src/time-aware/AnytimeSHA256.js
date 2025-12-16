@@ -1,5 +1,10 @@
 import { createHash } from 'crypto';
+import { z } from 'zod';
 import { logger } from '../logger.js';
+
+const deadlineSchema = z.number().nonnegative({ message: 'Deadline must be a non-negative number.' });
+const bufferSchema = z.instanceof(Buffer, { message: 'Input must be a Buffer.' });
+const chunkSizeSchema = z.number().int().positive({ message: 'Chunk size must be a positive integer.' });
 
 /**
  * An interruptible SHA256 hashing algorithm that aborts if it exceeds a
@@ -11,6 +16,7 @@ import { logger } from '../logger.js';
  */
 export default class AnytimeSHA256 {
   constructor(deadline) {
+    deadlineSchema.parse(deadline);
     this.deadline = deadline;
     this.startTime = null;
   }
@@ -27,7 +33,9 @@ export default class AnytimeSHA256 {
    *   metDeadline: boolean
    * }} The hashing result.
    */
-  hash(inputBuffer, chunkSize = 65536) {
+  async hash(inputBuffer, chunkSize = 65536) {
+    bufferSchema.parse(inputBuffer);
+    chunkSizeSchema.parse(chunkSize);
     this.startTime = Date.now();
     const hash = createHash('sha256');
     let offset = 0;
@@ -48,6 +56,9 @@ export default class AnytimeSHA256 {
       const chunk = inputBuffer.slice(offset, end);
       hash.update(chunk);
       offset += chunkSize;
+
+      // Yield to the event loop
+      await new Promise(resolve => setImmediate(resolve));
     }
 
     const finalHash = hash.digest('hex');

@@ -1,15 +1,21 @@
+import { z } from 'zod';
 import { logger } from '../logger.js';
+
+const deadlineSchema = z.number().nonnegative({ message: 'Deadline must be a non-negative number.' });
+const arraySchema = z.array(z.any(), { message: 'Input must be an array.' });
 
 /**
  * An implementation of the Anytime Quicksort algorithm.
  */
 export default class AnytimeQuicksort {
   constructor(deadline) {
+    deadlineSchema.parse(deadline);
     this.deadline = deadline;
     this.startTime = null;
   }
 
   sort(arr) {
+    arraySchema.parse(arr);
     this.startTime = performance.now();
     const sortedArray = this.recursiveSort([...arr], 0, arr.length - 1, 0);
     const timeElapsed = performance.now() - this.startTime;
