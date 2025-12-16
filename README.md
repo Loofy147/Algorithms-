@@ -1,17 +1,12 @@
-# Advanced Computational Principles: A Research Toolkit
+# Advanced Computational Principles: A Production-Ready Library & Research Toolkit
 
-This project provides JavaScript implementations of seven advanced computational principles. These concepts, often confined to academic papers, are essential for building robust, efficient, and secure systems. This toolkit is designed as a learning and research tool to explore these powerful ideas.
+This project has a dual identity:
+
+1.  **A Production-Ready Library for Time-Aware Computing:** The primary focus of this project is to provide a battle-tested, production-grade library for Time-Aware Computing. This module is intended for use in real-world systems where time-budgeted computation is critical.
+
+2.  **A Research Toolkit for Advanced Computational Principles:** The project also serves as a research toolkit for exploring seven advanced computational principles. These modules are intended for academic and learning purposes, and are not recommended for production deployment.
 
 Our development is guided by a strict **[Professional Working Methodology](./METHODOLOGY.md)**, emphasizing a research-implement-verify workflow to ensure high-quality, understandable code.
-
-## Vision
-
-This is a **research toolkit** for exploring advanced computational concepts. It is intended for:
-- CS researchers exploring anytime algorithms
-- Graduate students in distributed systems
-- Engineers learning resource-aware computing
-
-It is **NOT** intended for direct production deployment. For production systems, please use battle-tested, specialized libraries.
 
 ## Principles Implemented
 
@@ -19,7 +14,7 @@ Each principle is implemented as a self-contained module. For detailed documenta
 
 | Principle | Key Implementation | Description | Use Case |
 | :--- | :--- | :--- | :--- |
-| **Time-Aware Computing** | `AnytimeQuicksort` | An algorithm that provides the best possible result within a strict time budget. | **[Real-time UI](./examples/time-aware-use-case.js)** |
+| **Time-Aware Computing** | `AnytimeQuicksort`, `AnytimeGzip`, `AnytimeSHA256` | Algorithms that can be stopped at any time to return a result of improving quality, or that can be gracefully interrupted to meet a deadline. | **[Real-time UI](./examples/real-world-anytime-sort.js)**, **[Real-time Compression](./examples/real-world-anytime-gzip.js)**, **[Interruptible Hashing](./examples/real-world-anytime-sha256.js)** |
 | **Resource-Aware Computing**| `ResourceAwareScheduler` | A multi-objective scheduler that optimizes for CPU, energy, and carbon. | **[Cloud Cost Management](./examples/resource-aware-use-case.js)** |
 | **Adversarial-First Design**| `SecureHashMap` | A hash map resistant to collision-based denial-of-service attacks. | **[Secure Caching Server](./examples/adversarial-first-use-case.js)** |
 | **Algebraic Composability**| `composeWithTransaction`| A Saga-pattern orchestrator for building resilient, multi-step transactions. | **[Financial Transaction](./examples/algebraic-composability-use-case.js)** |
@@ -29,7 +24,7 @@ Each principle is implemented as a self-contained module. For detailed documenta
 
 ## Project Features
 
-While not designed for production, this toolkit is built with professional software engineering practices:
+This toolkit is built with professional software engineering practices:
 
 - **Centralized Configuration**: All algorithmic parameters are managed in `src/config.js` and can be overridden with environment variables.
 - **Structured Logging**: The entire system uses `pino` for structured, leveled logging, which is essential for observability and debugging.

@@ -81,10 +81,7 @@ describe('ResourceAwareScheduler', () => {
   });
 
   it('should produce a valid and high-value schedule using the Genetic Algorithm', () => {
-    // Increase budget slightly to make the test less brittle.
-    // The optimal solution requires exactly 10 CPU and 100 memory, which can be
-    // hard for the GA to find if it's on a sharp boundary.
-    const budgets = { cpu: 11, memory: 101 };
+    const budgets = { cpu: 10, memory: 100 };
     const tasks = [
         { name: 'Task A', value: 80, operations: 6e9, dataSize: 60, execute: () => {} },
         { name: 'Task B', value: 50, operations: 4e9, dataSize: 40, execute: () => {} },
