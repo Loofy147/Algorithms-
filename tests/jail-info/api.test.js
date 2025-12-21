@@ -8,8 +8,23 @@ describe('Jail-Info API', () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
   });
 
-  test('GET /api/v1/jobs should return a 200 status code and a valid schedule', async () => {
-    const response = await request(app).get('/api/v1/jobs');
+  test('POST /api/v1/schedule with a valid body should return a 200 status code', async () => {
+    const requestBody = {
+      tasks: [
+        { name: 'video-transcode-4k', value: 100, operations: 5e9, dataSize: 5e8 },
+        { name: 'audio-cleanup', value: 50, operations: 1e9, dataSize: 1e8 },
+      ],
+      budgets: {
+        cpu: 10,
+        memory: 1e9,
+        energy: 1000,
+      },
+    };
+
+    const response = await request(app)
+      .post('/api/v1/schedule')
+      .send(requestBody);
+
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty('message', 'Job schedule optimized');
     expect(response.body).toHaveProperty('schedule');
@@ -17,8 +32,18 @@ describe('Jail-Info API', () => {
     expect(response.body).toHaveProperty('utilization');
     expect(Array.isArray(response.body.schedule)).toBe(true);
     expect(Array.isArray(response.body.rejections)).toBe(true);
-    // Check that the high-resource task was rejected as expected
-    const rejectedNames = response.body.rejections.map(r => r.task);
-    expect(rejectedNames).toContain('user-analytics-pipeline');
+  });
+
+  test('POST /api/v1/schedule with an invalid body should return a 400 status code', async () => {
+    const requestBody = {
+      // Missing 'tasks' and 'budgets'
+    };
+
+    const response = await request(app)
+      .post('/api/v1/schedule')
+      .send(requestBody);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toHaveProperty('error', 'Invalid request body');
   });
 });

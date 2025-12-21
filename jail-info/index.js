@@ -1,8 +1,44 @@
 import express from 'express';
 import { fileURLToPath } from 'url';
+import { z } from 'zod';
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Add middleware to parse JSON bodies
+app.use(express.json());
+
+// --- Zod Validation Schema ---
+const taskSchema = z.object({
+  name: z.string(),
+  value: z.number().positive(),
+  operations: z.number().positive(),
+  dataSize: z.number().positive(),
+});
+
+const scheduleRequestSchema = z.object({
+  tasks: z.array(taskSchema),
+  budgets: z.object({
+    cpu: z.number().positive(),
+    memory: z.number().positive(),
+    energy: z.number().positive(),
+  }),
+});
+
+// --- Validation Middleware ---
+const validateScheduleRequest = (req, res, next) => {
+  const result = scheduleRequestSchema.safeParse(req.body);
+  if (!result.success) {
+    return res.status(400).json({
+      error: 'Invalid request body',
+      details: result.error.errors,
+    });
+  }
+  // Attach the validated data to the request object
+  req.validatedData = result.data;
+  next();
+};
+
 
 // Dynamically import the ES Module
 let ResourceAwareScheduler;
@@ -17,27 +53,24 @@ app.get('/', (req, res) => {
   res.send('Welcome to jail-info!');
 });
 
-app.get('/api/v1/jobs', (req, res) => {
+app.post('/api/v1/schedule', validateScheduleRequest, (req, res) => {
   if (!ResourceAwareScheduler) {
     return res.status(503).send({ error: 'Scheduler not available' });
   }
 
-  const budgets = {
-    cpu: 10,
-    memory: 1e9,
-    energy: 1000,
-  };
+  // Use the validated data from the middleware
+  const { tasks, budgets } = req.validatedData;
 
-  const mockTasks = [
-    { name: 'video-transcode-4k', value: 100, operations: 5e9, dataSize: 5e8, execute: () => 'done' },
-    { name: 'audio-cleanup', value: 50, operations: 1e9, dataSize: 1e8, execute: () => 'done' },
-    { name: 'thumbnail-generation', value: 20, operations: 2e8, dataSize: 5e7, execute: () => 'done' },
-    { name: 'user-analytics-pipeline', value: 80, operations: 8e9, dataSize: 1e9, execute: () => 'done' } // This one should be rejected
-  ];
+  // The scheduler expects an `execute` function on each task.
+  // The client won't send this, so we add a dummy one.
+  const executableTasks = tasks.map(task => ({
+    ...task,
+    execute: () => 'done'
+  }));
 
   try {
     const scheduler = new ResourceAwareScheduler(budgets, null, 'greedy');
-    const { schedule, rejections } = scheduler.optimizeSchedule(mockTasks);
+    const { schedule, rejections } = scheduler.optimizeSchedule(executableTasks);
     res.status(200).json({
         message: 'Job schedule optimized',
         schedule,
