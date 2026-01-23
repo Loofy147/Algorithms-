@@ -1,4 +1,4 @@
-import { DifferentiallyPrivateQuery } from '../../src/adversarial-first/DifferentiallyPrivateQuery.js';
+import { DifferentiallyPrivateQuery } from '../../shared/algorithms/adversarial-first/DifferentiallyPrivateQuery.js';
 
 describe('Differential Privacy', () => {
   it('should add noise to the result of a query', () => {

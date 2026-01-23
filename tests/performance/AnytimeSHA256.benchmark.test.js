@@ -1,4 +1,4 @@
-import AnytimeSHA256 from '../../src/time-aware/AnytimeSHA256.js';
+import AnytimeSHA256 from '../../shared/algorithms/time-aware/AnytimeSHA256.js';
 import { Buffer } from 'buffer';
 import { describe, it, jest } from '@jest/globals';
 

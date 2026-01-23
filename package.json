@@ -1,41 +1,47 @@
 {
-  "name": "app",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "test": "tests"
-  },
+  "name": "twin-ai-enhanced",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "web",
+    "mobile",
+    "shared"
+  ],
   "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:all": "pnpm test && pnpm test:integration && pnpm test:e2e",
+    "test:integration": "node tests/integration_test.js",
+    "test:e2e": "playwright test",
+    "test:perf": "node tests/performance/load_test.js",
+    "test:coverage": "vitest run --coverage",
+    "db:init": "pnpm --filter web db:init",
+    "db:migrate": "pnpm --filter web db:migrate",
+    "db:seed": "pnpm --filter web db:seed",
+    "security:audit": "pnpm audit && npm audit",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "docs:generate": "jsdoc -c jsdoc.json",
     "release": "standard-version"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Loofy147/Algorithms-.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "bugs": {
-    "url": "https://github.com/Loofy147/Algorithms-/issues"
-  },
-  "homepage": "https://github.com/Loofy147/Algorithms-#readme",
   "devDependencies": {
+    "@playwright/test": "^1.40.0",
     "docdash": "^2.0.2",
     "eslint": "^9.39.1",
     "eslint-plugin-jest": "^29.2.1",
-    "express": "^5.2.1",
     "jest": "^30.2.0",
     "jsdoc": "^4.0.5",
     "pino-pretty": "^13.1.2",
+    "prettier": "^3.1.1",
     "standard-version": "^9.5.0",
-    "supertest": "^7.1.4"
+    "supertest": "^7.1.4",
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
+    "express": "^5.2.1",
     "pino": "^10.1.0",
     "sharp": "^0.34.5",
     "simple-statistics": "^7.8.8",

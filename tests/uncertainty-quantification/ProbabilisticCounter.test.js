@@ -1,4 +1,4 @@
-import { ProbabilisticCounter } from '../../src/uncertainty-quantification/ProbabilisticCounter.js';
+import { ProbabilisticCounter } from '../../shared/algorithms/uncertainty-quantification/ProbabilisticCounter.js';
 
 describe('ProbabilisticCounter', () => {
   it('should initialize with zero counts', () => {

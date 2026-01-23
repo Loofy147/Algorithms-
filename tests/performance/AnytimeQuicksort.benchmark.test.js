@@ -1,5 +1,5 @@
-import AnytimeQuicksort from '../../src/time-aware/AnytimeQuicksort.js';
-import ParallelAnytimeQuicksort from '../../src/time-aware/ParallelAnytimeQuicksort.js';
+import AnytimeQuicksort from '../../shared/algorithms/time-aware/AnytimeQuicksort.js';
+import ParallelAnytimeQuicksort from '../../shared/algorithms/time-aware/ParallelAnytimeQuicksort.js';
 
 describe('AnytimeQuicksort Performance Benchmark', () => {
   const largeDataset = Array.from({ length: 100000 }, () => Math.random() * 1000 | 0);

@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import SecureHashMap from '../../src/adversarial-first/SecureHashMap.js';
+import SecureHashMap from '../../shared/algorithms/adversarial-first/SecureHashMap.js';
 import { performance } from 'perf_hooks';
 import { tTestTwoSample, sampleStandardDeviation, mean } from 'simple-statistics';
 

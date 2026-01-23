@@ -1,4 +1,4 @@
-import { GeneticAlgorithm } from '../../src/self-modifying/GeneticAlgorithm.js';
+import { GeneticAlgorithm } from '../../shared/algorithms/self-modifying/GeneticAlgorithm.js';
 
 describe('GeneticAlgorithm (Generic Engine)', () => {
   // Define a simple optimization problem: evolving a bitstring to all 1s.

@@ -1,8 +1,8 @@
-import ResourceAwareScheduler from '../../src/resource-aware/ResourceAwareScheduler.js';
-import { SimulatedCarbonIntensityAPI } from '../../src/resource-aware/SimulatedCarbonIntensityAPI.js';
+import ResourceAwareScheduler from '../../shared/algorithms/resource-aware/ResourceAwareScheduler.js';
+import { SimulatedCarbonIntensityAPI } from '../../shared/algorithms/resource-aware/SimulatedCarbonIntensityAPI.js';
 
 describe('Carbon-Aware Scheduling', () => {
-  it('should prioritize carbon-sensitive tasks during periods of low carbon intensity', () => {
+  test('should prioritize carbon-sensitive tasks during periods of low carbon intensity', async () => {
     const lowIntensityAPI = new SimulatedCarbonIntensityAPI('test');
     lowIntensityAPI.getCarbonIntensity = () => 100; // gCO2eq/kWh
 
@@ -37,8 +37,8 @@ describe('Carbon-Aware Scheduling', () => {
     const lowIntensityScheduler = new ResourceAwareScheduler(budgets, lowIntensityAPI);
     const highIntensityScheduler = new ResourceAwareScheduler(budgets, highIntensityAPI);
 
-    const { schedule: lowIntensitySchedule } = lowIntensityScheduler.optimizeSchedule(tasks);
-    const { schedule: highIntensitySchedule } = highIntensityScheduler.optimizeSchedule(tasks);
+    const { schedule: lowIntensitySchedule } = await lowIntensityScheduler.optimizeSchedule(tasks);
+    const { schedule: highIntensitySchedule } = await highIntensityScheduler.optimizeSchedule(tasks);
 
     // At low intensity, the carbon-sensitive task should be prioritized
     expect(lowIntensitySchedule[0].task).toBe('Low-Value, Carbon-Sensitive');

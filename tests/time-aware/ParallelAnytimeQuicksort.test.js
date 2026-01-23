@@ -1,4 +1,4 @@
-import ParallelAnytimeQuicksort from '../../src/time-aware/ParallelAnytimeQuicksort.js';
+import ParallelAnytimeQuicksort from '../../shared/algorithms/time-aware/ParallelAnytimeQuicksort.js';
 
 describe('ParallelAnytimeQuicksort', () => {
   it('should sort an array given enough time', async () => {

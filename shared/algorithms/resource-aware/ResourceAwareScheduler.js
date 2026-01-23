@@ -64,14 +64,14 @@ export default class ResourceAwareScheduler {
     };
   }
 
-  scheduleTask(task) {
+  async scheduleTask(task) {
     const check = this.canSchedule(task);
     if (!check.feasible) {
       throw new InfeasibleScheduleError(`Task "${task.name}" violates resource constraints`, check.violations);
     }
 
     const startTime = performance.now();
-    const result = task.execute();
+    const result = await Promise.resolve(task.execute());
     const actualTime = performance.now() - startTime;
 
     for (let resource in check.cost) {
@@ -215,7 +215,7 @@ export default class ResourceAwareScheduler {
     return optimalSchedule;
   }
 
-  optimizeSchedule(candidateTasks) {
+  async optimizeSchedule(candidateTasks) {
     let optimalSchedulePlan;
     switch (this.strategy) {
       case 'genetic':
@@ -234,7 +234,7 @@ export default class ResourceAwareScheduler {
     // Execute the planned schedule
     for (const task of optimalSchedulePlan) {
       try {
-        const result = this.scheduleTask(task);
+        const result = await this.scheduleTask(task);
         schedule.push({ task: task.name, scheduled: true, ...result });
       } catch (error) {
         logger.error({ err: error, taskName: task.name }, 'Task from optimal plan failed to schedule');

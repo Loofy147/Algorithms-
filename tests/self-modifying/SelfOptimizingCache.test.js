@@ -1,4 +1,4 @@
-import SelfOptimizingCache from '../../src/self-modifying/SelfOptimizingCache.js';
+import SelfOptimizingCache from '../../shared/algorithms/self-modifying/SelfOptimizingCache.js';
 
 describe('SelfOptimizingCache', () => {
   it('should start with LRU as the default strategy', () => {

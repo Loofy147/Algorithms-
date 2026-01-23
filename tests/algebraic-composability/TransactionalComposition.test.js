@@ -1,4 +1,4 @@
-import { ComposableOperation, composeWithTransaction } from '../../src/algebraic-composability/ComposableOperation.js';
+import { ComposableOperation, composeWithTransaction } from '../../shared/algorithms/algebraic-composability/ComposableOperation.js';
 import { z } from 'zod';
 
 describe('Transactional Composability', () => {

@@ -1,4 +1,4 @@
-import AnytimeQuicksort from '../../src/time-aware/AnytimeQuicksort.js';
+import AnytimeQuicksort from '../../shared/algorithms/time-aware/AnytimeQuicksort.js';
 import { performance } from 'perf_hooks';
 
 /**

@@ -1,4 +1,4 @@
-import SecureHashMap from '../../src/adversarial-first/SecureHashMap.js';
+import SecureHashMap from '../../shared/algorithms/adversarial-first/SecureHashMap.js';
 
 describe('SecureHashMap', () => {
   it('should set and get values correctly', () => {

@@ -1,4 +1,4 @@
-import DVFSController from '../../src/resource-aware/DVFSController.js';
+import DVFSController from '../../shared/algorithms/resource-aware/DVFSController.js';
 
 /**
  * Integration Test: ResourceAwareScheduler and DVFSController

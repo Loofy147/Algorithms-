@@ -1,4 +1,4 @@
-import WCETAnalyzer from '../../src/time-aware/WCETAnalyzer.js';
+import WCETAnalyzer from '../../shared/algorithms/time-aware/WCETAnalyzer.js';
 
 describe('WCETAnalyzer', () => {
   it('should measure the execution time of a function', () => {
