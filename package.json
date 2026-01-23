@@ -3,11 +3,6 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "web",
-    "mobile",
-    "shared"
-  ],
   "scripts": {
     "dev": "pnpm --filter web dev",
     "build": "pnpm --filter web build",
