@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import sharp from 'sharp';
-import AnytimeImageResize from '../../src/time-aware/AnytimeImageResize.js';
+import AnytimeImageResize from '../../shared/algorithms/time-aware/AnytimeImageResize.js';
 
 describe('AnytimeImageResize', () => {
   let testImage;

@@ -4,19 +4,20 @@ This document provides a manifest of the tools, environment, and orchestration s
 
 ## Toolchain
 
-- **Node.js**: v18.x
-- **npm**: v8.x
+- **Node.js**: v18.x (or higher)
+- **pnpm**: v8.x (or higher)
 - **ESLint**: v9.x
-- **Jest**: v29.x
+- **Jest**: v30.x
 - **standard-version**: v9.x
 - **JSDoc**: v4.x
+- **Vite**: v7.x
 
 ## Orchestration Steps
 
 The following steps should be followed for any maintenance or release task:
 
 1.  **Comprehensive Diagnostics**:
-    -   Run `npm install` to ensure all dependencies are up-to-date.
+    -   Run `pnpm install` at the root to ensure all workspace dependencies are up-to-date.
     -   Run `npx eslint .` to identify any linting issues.
     -   Run `npm audit` to check for security vulnerabilities.
     -   Run `npm test` to ensure the test suite is passing.

@@ -1,4 +1,4 @@
-import { PropensityScoreMatcher } from '../../src/causal-reasoning/PropensityScoreMatcher.js';
+import { PropensityScoreMatcher } from '../../shared/algorithms/causal-reasoning/PropensityScoreMatcher.js';
 
 describe('Propensity Score Matching', () => {
   it('should correctly estimate the treatment effect', () => {

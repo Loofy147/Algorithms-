@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { CircuitBreaker } from '../../src/resilience/CircuitBreaker.js';
+import { CircuitBreaker } from '../../shared/algorithms/resilience/CircuitBreaker.js';
 
 // Helper to wait for a specific time
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));

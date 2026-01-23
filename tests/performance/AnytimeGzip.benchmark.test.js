@@ -1,4 +1,4 @@
-import AnytimeGzip from '../../src/time-aware/AnytimeGzip.js';
+import AnytimeGzip from '../../shared/algorithms/time-aware/AnytimeGzip.js';
 import { Buffer } from 'buffer';
 import { describe, it } from '@jest/globals';
 

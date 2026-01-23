@@ -1,7 +1,7 @@
-import ResourceAwareScheduler from '../../src/resource-aware/ResourceAwareScheduler.js';
+import ResourceAwareScheduler from '../../shared/algorithms/resource-aware/ResourceAwareScheduler.js';
 
 describe('ResourceAwareScheduler', () => {
-  it('should schedule tasks that are within the resource budget', () => {
+  it('should schedule tasks that are within the resource budget', async () => {
     const scheduler = new ResourceAwareScheduler({
       cpu: 10,
       energy: 100,
@@ -18,13 +18,13 @@ describe('ResourceAwareScheduler', () => {
         execute: () => 'task1_complete'
       }
     ];
-    const { schedule, rejections } = scheduler.optimizeSchedule(tasks);
+    const { schedule, rejections } = await scheduler.optimizeSchedule(tasks);
     expect(schedule).toHaveLength(1);
     expect(rejections).toHaveLength(0);
     expect(schedule[0].scheduled).toBe(true);
   });
 
-  it('should reject tasks that exceed the resource budget', () => {
+  it('should reject tasks that exceed the resource budget', async () => {
     const scheduler = new ResourceAwareScheduler({
       cpu: 1,
       energy: 1,
@@ -41,13 +41,13 @@ describe('ResourceAwareScheduler', () => {
         execute: () => 'task1_complete'
       }
     ];
-    const { schedule, rejections } = scheduler.optimizeSchedule(tasks);
+    const { schedule, rejections } = await scheduler.optimizeSchedule(tasks);
     expect(schedule).toHaveLength(0);
     expect(rejections).toHaveLength(1);
     expect(rejections[0].scheduled).toBe(false);
   });
 
-  it('should prioritize carbon-sensitive tasks when carbon intensity is low', () => {
+  it('should prioritize carbon-sensitive tasks when carbon intensity is low', async () => {
     // Mock the CarbonIntensityAPI to control the carbon intensity value
     const mockCarbonApi = {
       getCarbonIntensity: () => 50 // Low carbon intensity
@@ -72,7 +72,7 @@ describe('ResourceAwareScheduler', () => {
       }
     ];
 
-    const { schedule } = scheduler.optimizeSchedule(tasks);
+    const { schedule } = await scheduler.optimizeSchedule(tasks);
 
     // The carbon-sensitive task should be scheduled first because its efficiency
     // is boosted by a factor of 3, making its effective value 30, which is
@@ -80,7 +80,7 @@ describe('ResourceAwareScheduler', () => {
     expect(schedule[0].task).toBe('Low-Value, Carbon-Sensitive');
   });
 
-  it('should produce a valid and high-value schedule using the Genetic Algorithm', () => {
+  it('should produce a valid and high-value schedule using the Genetic Algorithm', async () => {
     const budgets = { cpu: 10, memory: 100 };
     const tasks = [
         { name: 'Task A', value: 80, operations: 6e9, dataSize: 60, execute: () => {} },
@@ -89,7 +89,7 @@ describe('ResourceAwareScheduler', () => {
 
     // Run with the genetic algorithm scheduler
     const gaScheduler = new ResourceAwareScheduler(budgets, null, 'genetic');
-    const { schedule: gaSchedule } = gaScheduler.optimizeSchedule(tasks);
+    const { schedule: gaSchedule } = await gaScheduler.optimizeSchedule(tasks);
     const gaValue = gaSchedule.reduce((sum, task) => sum + tasks.find(t => t.name === task.task).value, 0);
 
     // The optimal solution for this setup is to schedule both tasks A and B for a total value of 130.

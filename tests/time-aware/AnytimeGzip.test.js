@@ -1,6 +1,6 @@
 import { gunzipSync } from 'zlib';
 import { jest } from '@jest/globals';
-import AnytimeGzip from '../../src/time-aware/AnytimeGzip.js';
+import AnytimeGzip from '../../shared/algorithms/time-aware/AnytimeGzip.js';
 
 import { gzipSync, constants } from 'zlib';
 

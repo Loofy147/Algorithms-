@@ -42,7 +42,7 @@ const validateScheduleRequest = (req, res, next) => {
 
 // Dynamically import the ES Module
 let ResourceAwareScheduler;
-import('../src/resource-aware/ResourceAwareScheduler.js').then((module) => {
+import('../shared/algorithms/resource-aware/ResourceAwareScheduler.js').then((module) => {
   ResourceAwareScheduler = module.default;
 }).catch(err => {
   console.error("Failed to load ResourceAwareScheduler:", err);
@@ -70,12 +70,16 @@ app.post('/api/v1/schedule', validateScheduleRequest, (req, res) => {
 
   try {
     const scheduler = new ResourceAwareScheduler(budgets, null, 'greedy');
-    const { schedule, rejections } = scheduler.optimizeSchedule(executableTasks);
-    res.status(200).json({
-        message: 'Job schedule optimized',
-        schedule,
-        rejections,
-        utilization: scheduler.getUtilization()
+    scheduler.optimizeSchedule(executableTasks).then(({ schedule, rejections }) => {
+      res.status(200).json({
+          message: 'Job schedule optimized',
+          schedule,
+          rejections,
+          utilization: scheduler.getUtilization()
+      });
+    }).catch(error => {
+      console.error('Error during scheduling:', error);
+      res.status(500).json({ error: 'An unexpected error occurred during scheduling.' });
     });
   } catch (error) {
     console.error('Error during scheduling:', error);

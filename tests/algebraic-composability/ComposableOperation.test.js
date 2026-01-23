@@ -1,4 +1,4 @@
-import { ComposableOperation, compose } from '../../src/algebraic-composability/ComposableOperation.js';
+import { ComposableOperation, compose } from '../../shared/algorithms/algebraic-composability/ComposableOperation.js';
 import { z } from 'zod';
 
 describe('Algebraic Composability with Zod', () => {

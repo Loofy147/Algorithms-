@@ -1,4 +1,4 @@
-import { LFUCache } from '../../src/self-modifying/CachingStrategies.js';
+import { LFUCache } from '../../shared/algorithms/self-modifying/CachingStrategies.js';
 
 describe('LFUCache Tie-Breaking Logic', () => {
   it('should evict the true LRU item when frequencies are tied', () => {

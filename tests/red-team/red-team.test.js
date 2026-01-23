@@ -1,13 +1,13 @@
-import AnytimeQuicksort from '../../src/time-aware/AnytimeQuicksort.js';
-import ResourceAwareScheduler from '../../src/resource-aware/ResourceAwareScheduler.js';
-import SecureHashMap from '../../src/adversarial-first/SecureHashMap.js';
-import { ComposableOperation, composeWithTransaction } from '../../src/algebraic-composability/ComposableOperation.js';
-import SelfOptimizingCache from '../../src/self-modifying/SelfOptimizingCache.js';
-import { CausalAnalyzer } from '../../src/causal-reasoning/CausalAnalyzer.js';
+import AnytimeQuicksort from '../../shared/algorithms/time-aware/AnytimeQuicksort.js';
+import ResourceAwareScheduler from '../../shared/algorithms/resource-aware/ResourceAwareScheduler.js';
+import SecureHashMap from '../../shared/algorithms/adversarial-first/SecureHashMap.js';
+import { ComposableOperation, composeWithTransaction } from '../../shared/algorithms/algebraic-composability/ComposableOperation.js';
+import SelfOptimizingCache from '../../shared/algorithms/self-modifying/SelfOptimizingCache.js';
+import { CausalAnalyzer } from '../../shared/algorithms/causal-reasoning/CausalAnalyzer.js';
 import { z } from 'zod';
 import { performance } from 'perf_hooks';
 import { describe, test, expect } from '@jest/globals';
-import { TransactionError } from '../../src/errors.js';
+import { TransactionError } from '../../shared/algorithms/errors.js';
 
 /**
  * RED TEAM TEST SUITE
@@ -80,7 +80,7 @@ describe('RED TEAM: AnytimeQuicksort Attack Vectors', () => {
 
 describe('RED TEAM: ResourceAwareScheduler Attack Vectors', () => {
 
-  test('ATTACK: Resource exhaustion via task saturation', () => {
+  test('ATTACK: Resource exhaustion via task saturation', async () => {
     const scheduler = new ResourceAwareScheduler({
       cpu: 10,
       energy: 100,
@@ -93,10 +93,10 @@ describe('RED TEAM: ResourceAwareScheduler Attack Vectors', () => {
       name: `Micro Task ${i}`,
       operations: 1e7, // Tiny individual cost
       value: 1,
-      execute: () => 'done'
+      execute: async () => 'done'
     }));
 
-    const {schedule, rejections} = scheduler.optimizeSchedule(tasks);
+    const {schedule, rejections} = await scheduler.optimizeSchedule(tasks);
 
     // HYPOTHESIS: Scheduler fails to detect cumulative resource exhaustion
     const totalCPU = schedule.reduce((sum, t) =>
@@ -106,7 +106,7 @@ describe('RED TEAM: ResourceAwareScheduler Attack Vectors', () => {
     expect(rejections.length).toBeGreaterThan(0); // Must reject some tasks
   });
 
-  test('ATTACK: Priority inversion via value gaming', () => {
+  test('ATTACK: Priority inversion via value gaming', async () => {
     const scheduler = new ResourceAwareScheduler({
       cpu: 100,
       energy: 10000
@@ -117,26 +117,26 @@ describe('RED TEAM: ResourceAwareScheduler Attack Vectors', () => {
         name: 'Honest High-Value',
         value: 100,
         operations: 5e9,
-        execute: () => 'done'
+        execute: async () => 'done'
       },
       {
         name: 'Gaming Low-Cost',
         value: 1,
         operations: 1e6, // Extremely low cost
-        execute: () => 'done'
+        execute: async () => 'done'
       }
     ];
 
-    const {schedule} = scheduler.optimizeSchedule(tasks);
+    const {schedule} = await scheduler.optimizeSchedule(tasks);
 
     // HYPOTHESIS: Low-cost task gets scheduled first due to efficiency metric
     // EXPECTED FAILURE: High-value task should have priority
     expect(schedule[0].task).toBe('Honest High-Value'); // DESIGNED TO FAIL
   });
 
-  test('ATTACK: Carbon intensity manipulation', () => {
+  test('ATTACK: Carbon intensity manipulation', async () => {
     const mockLowCarbon = {
-      getCarbonIntensity: () => 50 // Fake low reading
+      getCarbonIntensity: async () => 50 // Fake low reading
     };
 
     const scheduler = new ResourceAwareScheduler({
@@ -151,11 +151,11 @@ describe('RED TEAM: ResourceAwareScheduler Attack Vectors', () => {
         operations: 1e11, // Massive energy use
         carbonSensitive: true, // Claims to be green
         value: 10,
-        execute: () => 'done'
+        execute: async () => 'done'
       }
     ];
 
-    const {schedule} = scheduler.optimizeSchedule(tasks);
+    const {schedule} = await scheduler.optimizeSchedule(tasks);
 
     // HYPOTHESIS: Task gets 3x efficiency boost despite high actual carbon cost
     const actualCarbon = schedule[0]?.resourcesUsed?.carbon || 0;
@@ -164,7 +164,7 @@ describe('RED TEAM: ResourceAwareScheduler Attack Vectors', () => {
     expect(actualCarbon).toBeLessThan(100); // DESIGNED TO FAIL
   });
 
-  test('ATTACK: Memory allocation race condition', () => {
+  test('ATTACK: Memory allocation race condition', async () => {
     const scheduler = new ResourceAwareScheduler({
       cpu: 100,
       memory: 1000
@@ -176,10 +176,10 @@ describe('RED TEAM: ResourceAwareScheduler Attack Vectors', () => {
       operations: 1e8,
       dataSize: 101, // Each takes just over 10% of budget
       value: 10,
-      execute: () => 'done'
+      execute: async () => 'done'
     }));
 
-    const {schedule} = scheduler.optimizeSchedule(tasks);
+    const {schedule} = await scheduler.optimizeSchedule(tasks);
 
     // HYPOTHESIS: Scheduler schedules 10 tasks, but memory fragmentation
     // means only 9 can actually fit

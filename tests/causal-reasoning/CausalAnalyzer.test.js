@@ -1,4 +1,4 @@
-import { CausalAnalyzer } from '../../src/causal-reasoning/CausalAnalyzer.js';
+import { CausalAnalyzer } from '../../shared/algorithms/causal-reasoning/CausalAnalyzer.js';
 
 describe('CausalAnalyzer', () => {
   // This dataset is a classic example of Simpson's Paradox.
