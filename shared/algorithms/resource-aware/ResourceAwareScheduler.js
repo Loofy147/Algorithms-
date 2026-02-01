@@ -111,7 +111,7 @@ export default class ResourceAwareScheduler {
       let feasible = true;
       for (const resource in cost) {
         if (!this.budgets[resource]) continue;
-        if ((tempConsumed[resource] + cost[resource]) > this.budgets[resource]) {
+        if ((tempConsumed[resource] + cost[resource]) > this.budgets[resource] + 1e-9) {
           feasible = false;
           break;
         }

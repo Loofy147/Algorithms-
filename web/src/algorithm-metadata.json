@@ -1,0 +1,30 @@
+{
+  "algorithms": [
+    {
+      "name": "AnytimeQuicksort",
+      "complexity": "O(N log N)",
+      "tradeoff": "Time vs. Inversion Count",
+      "precomputed": true
+    },
+    {
+      "name": "SecureHashMap",
+      "complexity": "O(1) average",
+      "tradeoff": "Security (Timing) vs. Raw Speed",
+      "precomputed": true
+    },
+    {
+      "name": "ResourceAwareScheduler",
+      "complexity": "O(N) greedy / O(Gen * Pop) genetic",
+      "tradeoff": "Schedule Quality vs. Optimizer Overhead",
+      "precomputed": true
+    },
+    {
+      "name": "XFetchCache",
+      "complexity": "O(1)",
+      "tradeoff": "Probabilistic Consistency vs. Availability",
+      "precomputed": true
+    }
+  ],
+  "generatedAt": "2026-02-01T19:49:55.892Z",
+  "scope": "Build-Time (SSG/AOT)"
+}
