@@ -1,4 +1,3 @@
-
 import globals from "globals";
 import pluginJs from "@eslint/js";
 import jest from "eslint-plugin-jest";
@@ -15,7 +14,11 @@ export default [
   pluginJs.configs.recommended,
   {
       rules: {
-          "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }]
+          "no-unused-vars": ["error", {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_",
+            "caughtErrorsIgnorePattern": "^_"
+          }]
       }
   },
   {
