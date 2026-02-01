@@ -1,4 +1,4 @@
-import { constants, gzipSync } from 'zlib';
+import { gzipSync } from 'zlib';
 import { z } from 'zod';
 import { logger } from '../logger.js';
 

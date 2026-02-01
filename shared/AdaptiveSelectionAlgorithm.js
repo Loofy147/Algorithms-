@@ -1,5 +1,4 @@
 // shared/AdaptiveSelectionAlgorithm.js
-import ResourceAwareScheduler from './algorithms/resource-aware/ResourceAwareScheduler.js';
 
 class AdaptiveSelectionAlgorithm {
     async selectNextQuestions(db, profileId, limit = 10) {

@@ -1,7 +1,6 @@
-import { jest } from '@jest/globals';
 import SecureHashMap from '../../shared/algorithms/adversarial-first/SecureHashMap.js';
 import { performance } from 'perf_hooks';
-import { tTestTwoSample, sampleStandardDeviation, mean } from 'simple-statistics';
+import { tTestTwoSample, mean } from 'simple-statistics';
 
 // This test is designed to detect timing side-channels. It operates by
 // measuring the execution time of operations (get, set, delete) for two
@@ -56,7 +55,7 @@ describe('SecureHashMap Timing Side-Channel Analysis', () => {
       }
 
       // Basic statistical analysis for logging and debugging
-      const hitMean = mean(hitTimings);
+      mean(hitTimings);
       // Perform a two-sample t-test. The result is the p-value.
       const pValue = tTestTwoSample(hitTimings, missTimings);
 

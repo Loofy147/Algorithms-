@@ -2,8 +2,6 @@ import { gunzipSync } from 'zlib';
 import { jest } from '@jest/globals';
 import AnytimeGzip from '../../shared/algorithms/time-aware/AnytimeGzip.js';
 
-import { gzipSync, constants } from 'zlib';
-
 describe('AnytimeGzip', () => {
   // Use a larger buffer (1MB) to make the compression time more significant
   const testData = Buffer.from('a'.repeat(1 * 1024 * 1024));
@@ -45,13 +43,10 @@ describe('AnytimeGzip', () => {
     const result = compressor.compress(testData);
 
     // With a 0ms deadline, it might not even complete the first level
-    if (!result.buffer) {
-        expect(result.quality).toBe(0);
-        expect(result.level).toBe(-1);
-    } else {
-        // If it did complete, it should be the lowest quality
-        expect(result.level).toBe(1);
-    }
+    // We check either it failed or it completed level 1
+    const isValidResult = (!result.buffer && result.quality === 0 && result.level === -1) ||
+                          (result.buffer && result.level === 1);
+    expect(isValidResult).toBe(true);
   });
 
   it('should report a quality of 0 for incompressible data', () => {
@@ -60,10 +55,8 @@ describe('AnytimeGzip', () => {
     const result = compressor.compress(randomData);
 
     // Compressed size might be larger than original for random data
-    if (result.buffer.length >= randomData.length) {
-      expect(result.quality).toBe(0);
-    } else {
-      expect(result.quality).toBeGreaterThan(0);
-    }
+    const isQualityCorrect = (result.buffer.length >= randomData.length && result.quality === 0) ||
+                             (result.buffer.length < randomData.length && result.quality > 0);
+    expect(isQualityCorrect).toBe(true);
   });
 });
