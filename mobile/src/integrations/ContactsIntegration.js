@@ -2,7 +2,7 @@
 // Based on integration-code-impl.js
 
 class ContactsIntegration {
-  async syncContacts(db, profileId) {
+  async syncContacts(db) {
     // In a real React Native app, we would use:
     // import Contacts from 'react-native-contacts';
     // const contacts = await Contacts.getAll();
@@ -34,7 +34,7 @@ class ContactsIntegration {
     return { success: true, count: contacts.length };
   }
 
-  async generateQuestionsFromContacts(db, profileId) {
+  async generateQuestionsFromContacts(db) {
     const contacts = db.prepare("SELECT * FROM entities WHERE entity_type = 'person'").all();
     const questions = [];
 

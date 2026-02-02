@@ -111,7 +111,7 @@ export default class ResourceAwareScheduler {
       let feasible = true;
       for (const resource in cost) {
         if (!this.budgets[resource]) continue;
-        if ((tempConsumed[resource] + cost[resource]) > this.budgets[resource]) {
+        if ((tempConsumed[resource] + cost[resource]) > this.budgets[resource] + 1e-9) {
           feasible = false;
           break;
         }
@@ -171,7 +171,8 @@ export default class ResourceAwareScheduler {
         // BOLT: Use a standard loop instead of Object.keys().reduce() for performance
         for (let j = 0; j < numResources; j++) {
             const budget = budgetValues[j];
-            if (consumed[j] > budget) {
+            // Added small epsilon to account for floating point noise in budget checks
+            if (consumed[j] > budget + 1e-9) {
                 const violation = consumed[j] - budget;
                 const relativeViolation = violation / budget;
                 penalty += relativeViolation * 1000; // Gradient penalty
@@ -192,9 +193,10 @@ export default class ResourceAwareScheduler {
     };
 
     const mutationFunction = (gene) => {
-      const index = Math.floor(Math.random() * gene.length);
-      gene[index] = gene[index] === 1 ? 0 : 1;
-      return gene;
+      const newGene = [...gene];
+      const index = Math.floor(Math.random() * newGene.length);
+      newGene[index] = newGene[index] === 1 ? 0 : 1;
+      return newGene;
     };
 
     const ga = new GeneticAlgorithm({

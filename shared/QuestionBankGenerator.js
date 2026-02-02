@@ -96,7 +96,7 @@ class QuestionBankGenerator {
             { text: "A colleague takes credit for your work in a meeting. You:", dimension: 'Communication', aspect: 'direct' }
         ];
 
-        scenarios.forEach((s, idx) => {
+        scenarios.forEach((s) => {
             const dimIdx = this.dimensions.findIndex(d => d.name === s.dimension);
             questions.push({
                 text: `REAL WORLD SCENARIO: ${s.text}`,

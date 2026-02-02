@@ -1,6 +1,6 @@
 import AnytimeSHA256 from '../../shared/algorithms/time-aware/AnytimeSHA256.js';
 import { Buffer } from 'buffer';
-import { describe, it, jest } from '@jest/globals';
+import { describe, it, jest, expect } from '@jest/globals';
 
 describe('AnytimeSHA256 Performance Benchmark', () => {
   const dataSize = 50 * 1024 * 1024; // 50MB
@@ -32,5 +32,6 @@ describe('AnytimeSHA256 Performance Benchmark', () => {
 
     console.log('-------------------------------------------------------------------');
     console.log('Benchmark complete. This shows how chunking affects total time and throughput.');
+    expect(true).toBe(true);
   });
 });

@@ -83,7 +83,7 @@ const updateInventory = new ComposableOperation(
 // Step 3: Send confirmation email (this one will fail)
 const sendConfirmationEmail = new ComposableOperation(
   'sendConfirmationEmail',
-  (state) => {
+  (_state) => {
     console.log('[Step 3] Sending confirmation email...');
     // Simulate a failure in the email service
     throw new Error('Email service is down');

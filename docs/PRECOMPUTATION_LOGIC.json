@@ -1,0 +1,87 @@
+{
+  "Taxonomy_Map": {
+    "Compile-Time": {
+      "Scope": "Macros, Template Metaprogramming, Constexpr",
+      "Mechanism": "Code generation or evaluation during compilation (e.g., Rust macros, C++ templates).",
+      "Trade_off": "Increases binary size and compilation time by ~15-30%, but achieves zero runtime overhead (p99 reduction: 100% of compute cost)."
+    },
+    "Build-Time": {
+      "Scope": "Static Site Generation (SSG), Ahead-of-Time (AOT) Compilation",
+      "Mechanism": "Evaluating data-dependent logic during the CI/CD pipeline (e.g., Next.js SSG).",
+      "Trade_off": "Increases build duration but reduces Time-to-First-Byte (TTFB) by ~80% for static assets."
+    },
+    "Deploy-Time": {
+      "Scope": "Container Baking, Warm-up Scripts",
+      "Mechanism": "Pre-loading dependencies, pre-populating local caches, or pre-migrating schemas during the deployment phase.",
+      "Trade_off": "Extends deployment window, but eliminates 'Cold Start' latency in serverless environments (p99 reduction: ~2s to <50ms)."
+    },
+    "Run-Time": {
+      "Scope": "Memoization, Materialized Views, Request-Collapsing",
+      "Mechanism": "Dynamically caching results based on live request patterns (e.g., Redis memoization, Postgres Materialized Views).",
+      "Trade_off": "Introduces cache invalidation complexity and memory pressure (increases RAM usage), but reduces DB load by up to 90%."
+    }
+  },
+  "Deep_Dive_Analysis": {
+    "Database": {
+      "Pattern": "Incremental View Maintenance (IVM) & Stream Processing",
+      "Analysis": "Utilizing Kafka Streams or Apache Flink to maintain a continuous, stateful projection of the underlying data changes. Instead of O(N) scans, lookups are O(1) against a materialized state store.",
+      "Metrics": "Reduces read latency from seconds to sub-milliseconds. Increases write amplification by ~2x due to secondary state updates."
+    },
+    "Frontend": {
+      "Pattern": "Partial Hydration & Edge Caching",
+      "Analysis": "Leveraging Edge Computing (L2 caches) to pre-calculate HTML at the edge node. Partial Hydration (islands architecture) ensures that only the necessary interactive JS is shipped, while the rest is pre-computed static HTML.",
+      "Metrics": "Reduces Largest Contentful Paint (LCP) by ~60%. Decreases client-side CPU usage during hydration by ~75%."
+    },
+    "ML_Math": {
+      "Pattern": "Embedding Pre-calculation & Vector Store Optimization",
+      "Analysis": "Asynchronously converting raw data into high-dimensional vector embeddings during ingestion. Using HNSW (Hierarchical Navigable Small Worlds) for pre-built proximity graphs to enable fast Approximate Nearest Neighbor (ANN) search.",
+      "Metrics": "Increases storage requirements by 5-20x for vector dimensions. Reduces online inference time from 100ms+ to <5ms."
+    }
+  },
+  "Decision_Matrix_Table": {
+    "Efficiency_Formula": "Efficiency = (Freq_Read * Cost_Read) - (Freq_Write * Cost_Write)",
+    "Scoring_Weights": {
+      "Read_Write_Ratio": {
+        "Weight": 0.45,
+        "Optimal_Condition": "> 50:1",
+        "Description": "High read-to-write ratio indicates that pre-computation work is amortized over many reads."
+      },
+      "Data_Volatility_TTL": {
+        "Weight": 0.30,
+        "Optimal_Condition": "> 300s",
+        "Description": "Longer TTLs reduce the frequency of re-computation due to invalidation."
+      },
+      "Compute_Cost_Per_Unit": {
+        "Weight": 0.25,
+        "Optimal_Condition": "> 100ms",
+        "Description": "Expensive compute tasks (e.g., aggregations, ML inference) yield higher ROI when memoized."
+      }
+    },
+    "Decision_Thresholds": {
+      "Pre-compute": "Score > 0.75",
+      "Lazy_Compute": "Score 0.30 - 0.75",
+      "On-Demand": "Score < 0.30"
+    }
+  },
+  "Implementation_Code": {
+    "Pattern": "Staleness-Aware Cache with X-Fetch (Probabilistic Early Expiration)",
+    "Algorithm": "X-Fetch / PERC",
+    "Pseudocode": "class StalenessAwareCache:\n  constructor(beta = 1.0):\n    this.beta = beta\n\n  function get(key):\n    entry = cache.find(key)\n    if not entry:\n      return this.fetch_and_update(key)\n\n    # Probabilistic Early Expiration check to prevent cache stampede\n    # Formula: now - (delta * beta * log(rand())) > expiry\n    if (currentTime() - (entry.delta * this.beta * log(random())) > entry.expiry):\n      if lock.try_acquire(key):\n        background_task(() => this.fetch_and_update(key))\n    \n    return entry.value\n\n  function fetch_and_update(key):\n    start = currentTime()\n    value = remote_source.fetch(key)\n    delta = currentTime() - start\n    cache.set(key, { value, delta, expiry: start + TTL })\n    return value",
+    "Thundering_Herd_Protection": "Probabilistic early expiration spreads recomputation across multiple clients before hard expiration, ensuring that not all clients attempt a refresh simultaneously at t_expiry."
+  },
+  "Invalidation_Strategies": {
+    "TTL-based": {
+      "Suitability": "Build-Time / Deploy-Time",
+      "Mechanism": "Hard expiration after a fixed time interval. Simple but prone to staleness."
+    },
+    "Event-based": {
+      "Suitability": "Run-Time / Database IVM",
+      "Mechanism": "Listening to Change Data Capture (CDC) events from the source. High consistency, high complexity."
+    },
+    "Lease-based": {
+      "Status": "[EXPERIMENTAL]",
+      "Suitability": "High-Consistency Distributed Systems",
+      "Mechanism": "Readers acquire a lease; writer must invalidate leases before update. Ensures strict consistency but increases write latency."
+    }
+  }
+}

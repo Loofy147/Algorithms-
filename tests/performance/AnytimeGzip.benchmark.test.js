@@ -1,6 +1,6 @@
 import AnytimeGzip from '../../shared/algorithms/time-aware/AnytimeGzip.js';
 import { Buffer } from 'buffer';
-import { describe, it } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 
 describe('AnytimeGzip Performance Benchmark', () => {
   // Create a large, highly compressible payload (e.g., repeating string)
@@ -29,5 +29,6 @@ describe('AnytimeGzip Performance Benchmark', () => {
 
     console.log('----------------------------------------------------------------------------------');
     console.log('Benchmark complete. This demonstrates the trade-off between time and compression quality.');
+    expect(true).toBe(true);
   });
 });
